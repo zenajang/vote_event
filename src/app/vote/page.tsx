@@ -25,18 +25,47 @@ export default function VotePage() {
   };
 
   return (
-    <div className="min-h-dvh flex justify-center p-6">
-      <h1 className="text-2xl font-semibold">Finance 이벤트 투표</h1>
-      {matches.map((m) => (
-        <Card key={m.id} className="p-4 flex items-center justify-between">
-          <div className="font-medium">{m.team_a} vs {m.team_b}</div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => vote(m.id, 'A')}>{m.team_a}</Button>
-            <Button variant="outline" onClick={() => vote(m.id, 'B')}>{m.team_b}</Button>
+    <div className="container max-w-4xl mx-auto px-6 py-8">
+      <div className="space-y-6">
+        {matches.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">현재 진행 중인 투표가 없습니다.</p>
           </div>
-        </Card>
-      ))}
-      {msg && <p className="text-sm">{msg}</p>}
+        ) : (
+          matches.map((m) => (
+            <Card key={m.id} className="p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="font-semibold text-lg">{m.team_a} vs {m.team_b}</div>
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => vote(m.id, 'A')}
+                    className="min-w-[100px] hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    {m.team_a}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => vote(m.id, 'B')}
+                    className="min-w-[100px] hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    {m.team_b}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))
+        )}
+        {msg && (
+          <div className="text-center">
+            <p className="text-sm font-medium bg-muted px-4 py-2 rounded-md inline-block">
+              {msg}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
