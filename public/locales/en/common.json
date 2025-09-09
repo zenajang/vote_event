@@ -1,0 +1,9 @@
+{
+  "login.title": "Log In",
+  "login.google": "Sign in with Google",
+  "login.facebook": "Login with Facebook",
+  "login.note": "You can vote after logging in.",
+
+  "header.title": "Finance Vote Event",
+  "header.logout": "Log Out"
+}

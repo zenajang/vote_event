@@ -1,43 +1,40 @@
-// middleware.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
 
-const PROTECTED = ['/vote', '/results'];
+const PROTECTED_RE = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:vote|results)(?:\/|$)/
 
 export async function middleware(req: NextRequest) {
-  if (!PROTECTED.some((p) => req.nextUrl.pathname.startsWith(p))) {
-    return NextResponse.next();
-  }
+  const { pathname, search } = req.nextUrl
+  if (!PROTECTED_RE.test(pathname)) return NextResponse.next()
 
-  const res = NextResponse.next();
+  const res = NextResponse.next()
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (name) => req.cookies.get(name)?.value,
-        set: (name, value, options) => {
-          res.cookies.set({ name, value, ...options });
-        },
-        remove: (name, options) => {
-          res.cookies.set({ name, value: '', ...options, maxAge: 0 });
-        },
+        getAll: () => req.cookies.getAll(),
+        setAll: (pairs) => pairs.forEach(({ name, value, options }) =>
+          res.cookies.set({ name, value, ...options })
+        ),
       },
     }
-  );
+  )
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    const url = new URL('/login', req.url);
-    url.searchParams.set('redirect', req.nextUrl.pathname);
-    return NextResponse.redirect(url);
+    const seg0 = pathname.split('/').filter(Boolean)[0]
+    const login = /^[a-z]{2}(?:-[A-Z]{2})?$/.test(seg0) ? `/${seg0}/login` : '/login'
+    const url = new URL(login, req.url)
+    url.searchParams.set('redirect', pathname + search)
+    return NextResponse.redirect(url)
   }
 
-  return res;
+  return res
 }
 
 export const config = {
-  matcher: ['/vote/:path*', '/results/:path*'],
-};
+  matcher: ['/((?!auth|api|_next|favicon.ico|.*\\..*).*)'],
+}

@@ -1,0 +1,9 @@
+{
+  "login.title": "로그인",
+  "login.google": "Google로 로그인",
+  "login.facebook": "Facebook으로 로그인",
+  "login.note": "로그인 후 투표를 진행할 수 있어요.",
+
+  "header.title": "Finance 이벤트 투표",
+  "header.logout": "로그아웃"
+}
