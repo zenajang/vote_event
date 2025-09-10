@@ -5,19 +5,17 @@ import { createClient } from '@/lib/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useTranslation } from '@/app/i18n/useTranslation';
 
-type Props = {
-  dict: Record<string, string>;
-  locale: string;
-};
 
-export default function LoginClient({ dict, locale }: Props) {
+
+export default function LoginClient() {
   const supabase = createClient();
-  const t = (k: string) => dict[k] ?? k;
+  const {t,lng} = useTranslation('common');
 
   const signIn = async (provider: 'google' | 'facebook') => {
     const secure = location.protocol === 'https:' ? '; Secure' : '';
-    document.cookie = `next=/${locale}/vote; Path=/; SameSite=Lax${secure}`;
+    document.cookie = `next=/${lng}/vote; Path=/; SameSite=Lax${secure}`;
     await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: `${location.origin}/auth/callback` },

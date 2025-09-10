@@ -1,7 +1,7 @@
 import i18next from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import { i18nConfig, Locale } from './settings'
-import { addBackend, namespaces, backendOptions } from './locales'
+import { i18nConfig, type Locale } from './settings'
+import { resources, namespaces } from './locales'
 
 let initialized = false
 
@@ -11,7 +11,6 @@ export async function initI18n(lng: Locale) {
   const safeLng = supported.includes(lng) ? lng : fallback
 
   if (!initialized) {
-    addBackend()
     await i18next.use(initReactI18next).init({
       lng: safeLng,
       fallbackLng: fallback,
@@ -20,7 +19,7 @@ export async function initI18n(lng: Locale) {
       defaultNS: i18nConfig.defaultNS,
       interpolation: { escapeValue: false },
       react: { useSuspense: false },
-      backend: backendOptions,
+      resources,         
     })
     initialized = true
   } else if (i18next.language !== safeLng) {

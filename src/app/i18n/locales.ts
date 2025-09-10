@@ -1,14 +1,12 @@
-import i18next from 'i18next'
-import HttpBackend from 'i18next-http-backend'
-import { i18nConfig } from './settings'
+import type { Locale } from './settings'
+
+import ko_common from '@/locales/ko/common.json'
+import en_common from '@/locales/en/common.json'
 
 
-export const namespaces = [i18nConfig.defaultNS] as const
-
-export function addBackend() {
-  i18next.use(HttpBackend)
+export const resources: Record<Locale, Record<string, Record<string, string>>> = {
+  ko: { common: ko_common },
+  en: { common: en_common },
 }
 
-export const backendOptions = {
-  loadPath: '/locales/{{lng}}/{{ns}}.json',
-}
+export const namespaces = ['common'] as const
