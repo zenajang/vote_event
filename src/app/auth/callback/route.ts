@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createServer } from '@/lib/supabase/server';
+
 import { i18nConfig } from '@/app/i18n/settings';
+import { createServerAction } from '@/lib/supabase/server-action';
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
 
   if (code) {
-    const supabase = await createServer();
+    const supabase = await createServerAction();
     await supabase.auth.exchangeCodeForSession(code);
   }
 

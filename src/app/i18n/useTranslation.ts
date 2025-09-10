@@ -6,7 +6,7 @@ import i18next from 'i18next';
 import { initI18n } from './init';
 import { i18nConfig } from './settings';
 
-type TFunc = (key: string, options?: any) => string;
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
 export function useTranslation(ns: string = i18nConfig.defaultNS): { t: TFunc; lng: string } {
   const { locale } = useParams() as { locale?: string };

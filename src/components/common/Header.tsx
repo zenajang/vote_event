@@ -22,7 +22,7 @@ export default function Header() {
   const locale = LOCALES.includes(first) ? first : null;
   const isLoginPage = pathname === '/login' || (locale ? pathname === `/${locale}/login` : false);
 
-  const { t, lng } = useTranslation('common');
+  const { t } = useTranslation('common');
 
   useEffect(() => {
     const getUser = async () => {

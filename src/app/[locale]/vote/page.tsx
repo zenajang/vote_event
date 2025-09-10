@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button';
 type Match = { id: number; team_a: string; team_b: string };
 
 export default function VotePage() {
-  const supabase = createClient();
   const [matches, setMatches] = useState<Match[]>([]);
   const [msg, setMsg] = useState<string>();
 
   useEffect(() => {
+    const supabase = createClient();
     (async () => {
       const { data } = await supabase.from('matches').select('id, team_a, team_b').order('id', { ascending: false });
       setMatches(data ?? []);
@@ -19,6 +19,7 @@ export default function VotePage() {
   }, []);
 
   const vote = async (matchId: number, choice: 'A' | 'B') => {
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.from('votes').insert({ match_id: matchId, user_id: user?.id, choice });
     setMsg(error ? '이미 투표했거나 오류가 발생했어요.' : '투표 완료!');

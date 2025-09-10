@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { NextRequest, NextResponse } from 'next/server'
+
 
 const PROTECTED_RE = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:vote|results)(?:\/|$)/
 
