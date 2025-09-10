@@ -9,7 +9,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import { i18nConfig } from '@/app/i18n/settings';
 import { useTranslation } from '@/app/i18n/useTranslation';
 
-export default function Header() {
+function HeaderContent() {
   const supabase = createClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -68,11 +68,10 @@ export default function Header() {
             {t('header.title')}
           </h1>
         </div>
-        
-        <div className="flex items-center space-x-4">
-          <Suspense fallback={<div className="h-9 w-16 bg-gray-200 rounded-md animate-pulse" />}>
+      
+          <div className="flex items-center space-x-4">            
             <LanguageSwitcher />
-          </Suspense>
+                  
           {user ? (
             <div className="flex items-center space-x-3">
               <span className="text-sm text-muted-foreground">
@@ -100,5 +99,13 @@ export default function Header() {
         </div>
       </div>
     </header>
+  );
+}
+
+export default function Header() {
+  return (
+    <Suspense fallback={<div className="h-16 w-full bg-gray-100 animate-pulse" />}>
+      <HeaderContent />
+    </Suspense>
   );
 }
