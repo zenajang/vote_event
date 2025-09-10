@@ -1,30 +1,30 @@
 import i18next from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import HttpBackend from 'i18next-http-backend'
-import { i18nConfig } from './settings'
+import { i18nConfig, Locale } from './settings'
+import { addBackend, namespaces, backendOptions } from './locales'
 
 let initialized = false
 
-export async function initI18n(lng: string) {
+export async function initI18n(lng: Locale) {
+  const supported = i18nConfig.locales
+  const fallback = i18nConfig.defaultLocale
+  const safeLng = supported.includes(lng) ? lng : fallback
+
   if (!initialized) {
-    await i18next
-      .use(HttpBackend)          // ✅ public/locales 사용
-      .use(initReactI18next)
-      .init({
-        lng,
-        fallbackLng: i18nConfig.defaultLocale,
-        supportedLngs: i18nConfig.locales,
-        ns: ['common'],         // 필요하면 네임스페이스 추가
-        defaultNS: 'common',
-        interpolation: { escapeValue: false },
-        backend: {
-          loadPath: '/locales/{{lng}}/{{ns}}.json', // ✅ public/locales 사용
-        },
-        react: { useSuspense: false },
-      })
+    addBackend()
+    await i18next.use(initReactI18next).init({
+      lng: safeLng,
+      fallbackLng: fallback,
+      supportedLngs: supported,
+      ns: namespaces as unknown as string[],
+      defaultNS: i18nConfig.defaultNS,
+      interpolation: { escapeValue: false },
+      react: { useSuspense: false },
+      backend: backendOptions,
+    })
     initialized = true
-  } else if (i18next.language !== lng) {
-    await i18next.changeLanguage(lng)
+  } else if (i18next.language !== safeLng) {
+    await i18next.changeLanguage(safeLng)
   }
   return i18next
 }

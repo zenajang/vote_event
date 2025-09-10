@@ -4,14 +4,15 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import i18next from 'i18next';
 import { initI18n } from './init';
-import { i18nConfig } from './settings';
+import { i18nConfig, Locale } from './settings';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-export function useTranslation(ns: string = i18nConfig.defaultNS): { t: TFunc; lng: string } {
+export function useTranslation(ns: string = i18nConfig.defaultNS): { t: TFunc; lng:Locale } {
   const { locale } = useParams() as { locale?: string };
   const list = i18nConfig.locales as unknown as string[];
-  const lng = (locale && list.includes(locale)) ? locale : i18nConfig.defaultLocale;
+  const lng = ((locale && list.includes(locale)) ? locale : i18nConfig.defaultLocale) as Locale;
+
 
   const [, force] = useState(0);
   useEffect(() => {

@@ -2,10 +2,11 @@
 import { useEffect, useState } from 'react';
 import i18next from 'i18next';
 import { initI18n } from './init';
+import { Locale } from './settings';
 
 type TFunc = (key: string, options?: Record<string, unknown>) => string;
 
-export function useClientT(lng: string, ns?: string): TFunc {
+export function useClientT(lng: Locale, ns?: string): TFunc {
   const [, rerender] = useState(0);
 
   useEffect(() => {
