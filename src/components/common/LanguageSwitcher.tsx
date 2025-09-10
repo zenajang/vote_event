@@ -2,8 +2,9 @@
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { i18nConfig } from '@/app/i18n/settings';
+import { Suspense } from 'react';
 
-export default function LanguageSwitcher() {
+function LanguageSwitcherContent() {
   const router = useRouter();
   const pathname = usePathname() || '/';
   const searchParams = useSearchParams();
@@ -43,5 +44,13 @@ export default function LanguageSwitcher() {
         <option key={l} value={l}>{l.toUpperCase()}</option>
       ))}
     </select>
+  );
+}
+
+export default function LanguageSwitcher() {
+  return (
+    <Suspense fallback={<div className="h-9 w-16 bg-gray-200 rounded-md animate-pulse" />}>
+      <LanguageSwitcherContent />
+    </Suspense>
   );
 }

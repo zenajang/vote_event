@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
@@ -70,7 +70,9 @@ export default function Header() {
         </div>
         
         <div className="flex items-center space-x-4">
-          <LanguageSwitcher />
+          <Suspense fallback={<div className="h-9 w-16 bg-gray-200 rounded-md animate-pulse" />}>
+            <LanguageSwitcher />
+          </Suspense>
           {user ? (
             <div className="flex items-center space-x-3">
               <span className="text-sm text-muted-foreground">
