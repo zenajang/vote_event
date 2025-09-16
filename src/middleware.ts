@@ -1,28 +1,38 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
+const ALLOWED_COUNTRIES = new Set(['KR'])
 
-const ALLOWED_COUNTRIES = new Set(["KR"]); 
+const AUTH_FREE_RE =
+  /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:login|signup|auth(?:\/.*)?|not-available)(?:\/|$)/
+
+const PROTECTED_RE =
+  /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:vote|results)(?:\/|$)/
 
 function getCountry(req: NextRequest) {
   return (
-    process.env.TEST_FORCE_COUNTRY ||            
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any  
-    (req as any).geo?.country ||                            
-    req.headers.get("x-vercel-ip-country") ||    
-    req.headers.get("cf-ipcountry") ||     
-    ""
-  );
+    process.env.TEST_FORCE_COUNTRY ||
+    (req as any).geo?.country ||
+    req.headers.get('x-vercel-ip-country') ||
+    req.headers.get('cf-ipcountry') ||
+    ''
+  )
 }
 
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl
 
+  if (req.method === 'OPTIONS') return NextResponse.next()
+
   const country = getCountry(req)
   if (!ALLOWED_COUNTRIES.has(country)) {
     return new NextResponse('Not Found', { status: 404 })
-    // or return NextResponse.rewrite(new URL('/not-available', req.url)) 
   }
+
+  if (AUTH_FREE_RE.test(pathname)) return NextResponse.next()
+
+  if (!PROTECTED_RE.test(pathname)) return NextResponse.next()
+
   const res = NextResponse.next()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,9 +40,10 @@ export async function middleware(req: NextRequest) {
     {
       cookies: {
         getAll: () => req.cookies.getAll(),
-        setAll: (pairs) => pairs.forEach(({ name, value, options }) =>
-          res.cookies.set({ name, value, ...options })
-        ),
+        setAll: (pairs) =>
+          pairs.forEach(({ name, value, options }) =>
+            res.cookies.set({ name, value, ...options })
+          ),
       },
     }
   )
@@ -51,5 +62,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!auth|api|_next|favicon.ico|.*\\..*).*)'],
+  matcher: [
+    '/((?!_next/|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|css|js|map|txt)).*)',
+  ],
 }
