@@ -6,7 +6,8 @@ const ALLOWED_COUNTRIES = new Set(["KR"]);
 
 function getCountry(req: NextRequest) {
   return (
-    process.env.TEST_FORCE_COUNTRY ||              
+    process.env.TEST_FORCE_COUNTRY ||            
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any  
     (req as any).geo?.country ||                            
     req.headers.get("x-vercel-ip-country") ||    
     req.headers.get("cf-ipcountry") ||     
