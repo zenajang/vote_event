@@ -2,14 +2,27 @@ import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
 
-const PROTECTED_RE = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:vote|results)(?:\/|$)/
+const ALLOWED_COUNTRIES = new Set(["KR"]); 
+
+function getCountry(req: NextRequest) {
+  return (
+    process.env.TEST_FORCE_COUNTRY ||              
+    (req as any).geo?.country ||                            
+    req.headers.get("x-vercel-ip-country") ||    
+    req.headers.get("cf-ipcountry") ||     
+    ""
+  );
+}
 
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl
-  if (!PROTECTED_RE.test(pathname)) return NextResponse.next()
 
+  const country = getCountry(req)
+  if (!ALLOWED_COUNTRIES.has(country)) {
+    return new NextResponse('Not Found', { status: 404 })
+    // or return NextResponse.rewrite(new URL('/not-available', req.url)) 
+  }
   const res = NextResponse.next()
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
