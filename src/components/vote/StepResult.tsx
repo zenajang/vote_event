@@ -16,29 +16,27 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
 
   const { t } = useTranslation('common');
   
+useEffect(() => {
+  let cancelled = false;
 
-  useEffect(() => {
-    let cancelled = false;
-    let timerId: NodeJS.Timeout;
+  const load = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchOverallRankings();
+      if (!cancelled) setRows(data);
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
+  };
 
-    const load = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchOverallRankings();
-        if (!cancelled) setRows(data);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
+  load();
+  const timer: ReturnType<typeof setInterval> = setInterval(load, pollMs);
 
-    load();
-    timerId = setInterval(load, pollMs);
-    
-    return () => {
-      cancelled = true;
-      clearInterval(timerId);
-    };
-  }, [pollMs]);
+  return () => {
+    cancelled = true;
+    clearInterval(timer);
+  };
+}, [pollMs]);
 
   const totalVotes = useMemo(
     () => rows.reduce((sum, r) => sum + r.votes, 0),
@@ -47,7 +45,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
 
   return (
     <div className="container mx-auto max-w-2xl p-6">
-      <h1 className="mb-4 text-lg font-semibold">전체 종합 순위</h1>
+      <h1 className="mb-4 text-lg font-semibold">{t('result.title')}</h1>
       {message && (
         <p className="mb-4 inline-block rounded bg-muted px-3 py-2 text-sm">
           {message}
@@ -55,7 +53,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
       )}
 
       {loading ? (
-        <p className="text-muted-foreground">집계 로딩 중…</p>
+        <p className="text-muted-foreground">{t('result.loading')}</p>
       ) : (
         <ul className="divide-y rounded border">
           {rows.map((r) => {
