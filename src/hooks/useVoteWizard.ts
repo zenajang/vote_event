@@ -24,41 +24,38 @@ function useSessionState<T>(key: string, initial: T | null) {
 }
 
 // 안전한 step 관리
+// useStepFromURL 기존
 function useStepFromURL() {
   const [step, setStep] = useState<Step>('intro');
-  
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
-    const params = new URLSearchParams(window.location.search);
-    const stepParam = params.get('step') as Step;
-    if (stepParam && ['intro', 'country', 'team', 'result'].includes(stepParam)) {
-      setStep(stepParam);
-    }
-    
-    // URL 변경 감지
-    const handlePopState = () => {
-      const newParams = new URLSearchParams(window.location.search);
-      const newStep = newParams.get('step') as Step;
-      if (newStep && ['intro', 'country', 'team', 'result'].includes(newStep)) {
-        setStep(newStep);
-      } else {
-        setStep('intro');
-      }
+
+    const read = () => {
+      const params = new URLSearchParams(window.location.search);
+      const s = params.get('step') as Step;
+      setStep(['intro', 'country', 'team', 'result'].includes(s) ? s : 'intro');
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    // 최초 1회
+    read();
+
+    // 뒤/앞으로만 듣던 걸 유지
+    const onPop = () => read();
+    window.addEventListener('popstate', onPop);
+
+    return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  return step;
+  return [step, setStep] as const; // ✅ setter를 같이 리턴
 }
+
 
 export function useVoteWizardState() {
   const router = useRouter();
   const pathname = usePathname();
   
-  const step = useStepFromURL();
+  const [step,setStepState] = useStepFromURL();
   const [countryId, setCountryId] = useSessionState<number>('countryId', null);
   const [teamId, setTeamId] = useSessionState<number>('teamId', null);
   const [msg, setMsg] = useState<string>('');
@@ -66,10 +63,10 @@ export function useVoteWizardState() {
 
   const go = useCallback(
     (next: Step) => {
-      const url = `${pathname}?step=${next}`;
-      router.replace(url);
+      setStepState(next); 
+      router.replace(`${pathname}?step=${next}`);
     },
-    [router, pathname]
+    [router, pathname, setStepState]
   );
 
   const reset = useCallback(() => {
