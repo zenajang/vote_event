@@ -17,26 +17,27 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
   const { t } = useTranslation('common');
   
   useEffect(() => {
-    let cancelled = false;
-    let timer: any;
+  let cancelled = false;
 
-    const load = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchOverallRankings();
-        if (!cancelled) setRows(data);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
+  const load = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchOverallRankings();
+      if (!cancelled) setRows(data);
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
+  };
 
-    load();
-    timer = setInterval(load, pollMs);
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-    };
-  }, [pollMs]);
+  load();
+  const timer: ReturnType<typeof setInterval> = setInterval(load, pollMs);
+
+  return () => {
+    cancelled = true;
+    clearInterval(timer);
+  };
+}, [pollMs]);
+
 
   const totalVotes = useMemo(
     () => rows.reduce((sum, r) => sum + r.votes, 0),
