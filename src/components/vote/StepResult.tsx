@@ -19,7 +19,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
 
   useEffect(() => {
     let cancelled = false;
-    let timer: any;
+    let timerId: NodeJS.Timeout;
 
     const load = async () => {
       try {
@@ -32,10 +32,11 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
     };
 
     load();
-    timer = setInterval(load, pollMs);
+    timerId = setInterval(load, pollMs);
+    
     return () => {
       cancelled = true;
-      clearInterval(timer);
+      clearInterval(timerId);
     };
   }, [pollMs]);
 
@@ -46,7 +47,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
 
   return (
     <div className="container mx-auto max-w-2xl p-6">
-      <h1 className="mb-4 text-lg font-semibold">{t('result.title')}</h1>
+      <h1 className="mb-4 text-lg font-semibold">전체 종합 순위</h1>
       {message && (
         <p className="mb-4 inline-block rounded bg-muted px-3 py-2 text-sm">
           {message}
@@ -54,7 +55,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
       )}
 
       {loading ? (
-        <p className="text-muted-foreground">{t('result.loading')}</p>
+        <p className="text-muted-foreground">집계 로딩 중…</p>
       ) : (
         <ul className="divide-y rounded border">
           {rows.map((r) => {
