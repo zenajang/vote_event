@@ -23,7 +23,7 @@ export default function LoginClient() {
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center p-6">
+    <div className="min-h-[calc(100dvh-64px)] flex items-center justify-center p-6">
       <Card className="w-full max-w-sm p-6 space-y-4">
         <div className="mb-6 text-center">
           <h1 className="text-xl font-semibold">{t('login.title')}</h1>

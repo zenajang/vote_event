@@ -13,7 +13,7 @@ function HeaderContent() {
   const supabase = createClient();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); 
   const search = searchParams?.toString() || '';
   const [user, setUser] = useState<User | null>(null);
 
@@ -71,7 +71,6 @@ function HeaderContent() {
       
           <div className="flex items-center space-x-4">            
             <LanguageSwitcher />
-                  
           {user ? (
             <div className="flex items-center space-x-3">
               <span className="text-sm text-muted-foreground">
@@ -81,7 +80,7 @@ function HeaderContent() {
                 variant="outline" 
                 size="sm"
                 onClick={logout}
-                className="h-9 px-4 hover:bg-muted hover:text-muted-foreground transition-colors"
+                className="h-8 px-2 hover:bg-muted hover:text-muted-foreground transition-colors"
               >
                 {t('header.logout')}
               </Button>
@@ -91,9 +90,9 @@ function HeaderContent() {
               variant="default" 
               size="sm"
               onClick={goLogin}
-              className="h-9 px-4"
+              className="h-8 px-2"
             >
-              로그인
+              {t('header.login')}
             </Button>
           )}
         </div>

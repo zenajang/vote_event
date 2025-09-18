@@ -4,6 +4,12 @@
   "login.facebook": "Facebook으로 로그인",
   "login.note": "로그인 후 투표를 진행할 수 있어요.",
 
-  "header.title": "Finance 이벤트 투표",
-  "header.logout": "로그아웃"
+  "header.title": "Finance",
+  "header.login":" 로그인",
+  "header.logout": "로그아웃",
+
+  "button.next": "다음",
+  "button.back": "이전",
+  "button.submit": "제출",
+  "button.submitting": "제출 중..."
 }

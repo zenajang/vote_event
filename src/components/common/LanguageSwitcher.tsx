@@ -37,7 +37,7 @@ function LanguageSwitcherContent() {
     <select
       value={value}
       onChange={onChange}
-      className="h-9 px-2 border rounded-md text-black"
+      className="h-8 px-2 border rounded-md text-black"
       aria-label="Select language"
     >
       {LOCALES.map(l => (
@@ -49,7 +49,7 @@ function LanguageSwitcherContent() {
 
 export default function LanguageSwitcher() {
   return (
-    <Suspense fallback={<div className="h-9 w-16 bg-gray-200 rounded-md animate-pulse" />}>
+    <Suspense fallback={<div className="h-8 w-16 bg-gray-200 rounded-md animate-pulse" />}>
       <LanguageSwitcherContent />
     </Suspense>
   );

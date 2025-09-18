@@ -1,72 +1,191 @@
 'use client';
+
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import {
+  fetchCountries,
+  fetchTeams,
+  submitVote,
+  type Country,
+  type Team,
+  fetchMyVoteTeamId,
+} from '@/services/voteService';
+import { useVoteWizardState, useSelected} from '@/hooks/useVoteWizard';
 
-type Match = { id: number; team_a: string; team_b: string };
+import StepIntro from '@/components/vote/StepIntro';
+import StepCountry from '@/components/vote/StepCountry';
+import StepTeam from '@/components/vote/StepTeam';
+import StepResult from '@/components/vote/StepResult';
 
-export default function VotePage() {
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [msg, setMsg] = useState<string>();
+export default function VoteWizard() {
+  const {
+    step, go,
+    countryId, setCountryId,
+    teamId, setTeamId,
+    msg, setMsg,
+    submitting, setSubmitting,
+    reset,
+  } = useVoteWizardState();
 
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loadingCountries, setLoadingCountries] = useState(true);
+  const [loadingTeams, setLoadingTeams] = useState(false);
+  const [checkingVote, setCheckingVote] = useState(true);
+
+  const currentCountry = useSelected(countries, countryId ?? null);
+
+  // 국가 목록 로드
   useEffect(() => {
-    const supabase = createClient();
     (async () => {
-      const { data } = await supabase.from('matches').select('id, team_a, team_b').order('id', { ascending: false });
-      setMatches(data ?? []);
+      try {
+        setLoadingCountries(true);
+        const list = await fetchCountries();
+        setCountries(list);
+      } finally {
+        setLoadingCountries(false);
+      }
     })();
   }, []);
 
-  const vote = async (matchId: number, choice: 'A' | 'B') => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from('votes').insert({ match_id: matchId, user_id: user?.id, choice });
-    setMsg(error ? '이미 투표했거나 오류가 발생했어요.' : '투표 완료!');
-  };
+  // 선택한 국가의 팀 목록 로드
+  useEffect(() => {
+    (async () => {
+      if (!countryId) {
+        setTeams([]);
+        setTeamId(null);
+        return;
+      }
+      try {
+        setLoadingTeams(true);
+        const list = await fetchTeams(countryId);
+        setTeams(list);
+        // 이전에 선택한 teamId가 없어진 경우 초기화
+        if (teamId && !list.some((t) => t.id === teamId)) setTeamId(null);
+      } finally {
+        setLoadingTeams(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countryId]);
 
+  // 스텝 가드
+  useEffect(() => {
+    if (step === 'team' && !countryId) go('country');
+  }, [step, countryId, go]);
+
+useEffect(() => {
+  if (step === 'result') { setCheckingVote(false); return; }
+  setCheckingVote(true);
+
+  let cancelled = false;
+  (async () => {
+    try {
+      const votedTeamId = await fetchMyVoteTeamId();
+      if (!cancelled && votedTeamId) {
+        setTeamId(votedTeamId);
+        setMsg('투표를 완료하셨습니다.');
+        go('result');
+      }
+    } finally {
+      if (!cancelled) setCheckingVote(false);
+    }
+  })();
+
+  return () => { cancelled = true; };
+}, [step, go, setTeamId, setMsg]);
+
+useEffect(() => {
+  if (step !== 'result' || teamId != null) return;
+
+  let cancelled = false;
+  (async () => {
+    try {
+      const voted = await fetchMyVoteTeamId();
+      if (!cancelled && voted) setTeamId(voted);
+    } catch {
+      // 비로그인/권한 이슈 등은 무시
+    }
+  })();
+
+  return () => { cancelled = true; };
+}, [step, teamId, setTeamId]);
+
+  
+if ((step === 'country' || step === 'team') && checkingVote) {
+  return null; 
+}
+
+// 제출
+const onSubmit = async () => {
+  if (!teamId || submitting) return;
+  setSubmitting(true);
+  setMsg('');
+
+  try {
+    await submitVote(teamId);
+    setMsg('투표 완료!');
+    go('result');
+    return;
+  } catch (e: any) {
+    if (e?.code === '23505') {
+      try {
+        const votedTeamId = await fetchMyVoteTeamId();
+        if (votedTeamId) setTeamId(votedTeamId);
+      } catch {}
+      setMsg('투표를 완료하셨습니다.');
+      go('result');
+      return;
+    } else if (e?.code === '401' || e?.message === 'unauthorized') {
+      setMsg('로그인이 필요합니다.');
+    } else {
+      setMsg('오류가 발생했어요.');
+    }
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+
+  if (step === 'intro') {
+    return <StepIntro onNext={() => go('country')} />;
+  }
+
+  if (step === 'country') {
+    return (
+      <StepCountry
+        countries={countries}
+        loading={loadingCountries}
+        selectedCountryId={countryId ?? null}
+        onSelect={(id) => setCountryId(id)}
+        onPrev={() => go('intro')}
+        onNext={() => go('team')}
+      />
+    );
+  }
+
+  if (step === 'team') {
+    return (
+      <StepTeam
+        country={currentCountry ?? undefined}
+        teams={teams}
+        loading={loadingTeams}
+        selectedTeamId={teamId ?? null}
+        onSelect={(id) => setTeamId(id)}
+        onPrev={() => go('country')}
+        onSubmit={onSubmit}
+        submitting={submitting}
+        msg={msg}
+        canSubmit={!!teamId && teams.length > 0}
+      />
+    );
+  }
+
+  if (step === 'result') {
   return (
-    <div className="container max-w-4xl mx-auto px-6 py-8">
-      <div className="space-y-6">
-        {matches.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">현재 진행 중인 투표가 없습니다.</p>
-          </div>
-        ) : (
-          matches.map((m) => (
-            <Card key={m.id} className="p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div className="font-semibold text-lg">{m.team_a} vs {m.team_b}</div>
-                <div className="flex gap-3">
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    onClick={() => vote(m.id, 'A')}
-                    className="min-w-[100px] hover:bg-primary hover:text-primary-foreground transition-colors"
-                  >
-                    {m.team_a}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    onClick={() => vote(m.id, 'B')}
-                    className="min-w-[100px] hover:bg-primary hover:text-primary-foreground transition-colors"
-                  >
-                    {m.team_b}
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))
-        )}
-        {msg && (
-          <div className="text-center">
-            <p className="text-sm font-medium bg-muted px-4 py-2 rounded-md inline-block">
-              {msg}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+    <StepResult
+      myTeamId={teamId ?? null}
+      message={msg}
+    />
   );
+}
 }

@@ -5,5 +5,11 @@
   "login.note": "You can vote after logging in.",
 
   "header.title": "Finance Vote Event",
-  "header.logout": "Log Out"
+  "header.logout": "Log Out",
+  "header.login":" Log In",
+  
+  "button.next": "Next",
+  "button.back": "Prev",
+  "button.submit": "Submit",
+  "button.submitting": "Submitting..."
 }
