@@ -22,8 +22,7 @@ export default function VoteWizard() {
     countryId, setCountryId,
     teamId, setTeamId,
     msg, setMsg,
-    submitting, setSubmitting,
-    reset,
+    submitting, setSubmitting
   } = useVoteWizardState();
 
   const [countries, setCountries] = useState<Country[]>([]);
@@ -126,8 +125,9 @@ const onSubmit = async () => {
     setMsg('투표 완료!');
     go('result');
     return;
-  } catch (e: any) {
-    if (e?.code === '23505') {
+  } catch (e: unknown) {
+    const error = e as { code?: string; message?: string };
+    if (error?.code === '23505') {
       try {
         const votedTeamId = await fetchMyVoteTeamId();
         if (votedTeamId) setTeamId(votedTeamId);
@@ -135,7 +135,7 @@ const onSubmit = async () => {
       setMsg('투표를 완료하셨습니다.');
       go('result');
       return;
-    } else if (e?.code === '401' || e?.message === 'unauthorized') {
+    } else if (error?.code === '401' || error?.message === 'unauthorized') {
       setMsg('로그인이 필요합니다.');
     } else {
       setMsg('오류가 발생했어요.');

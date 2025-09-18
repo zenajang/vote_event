@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { fetchOverallRankings, type OverallRow } from '@/services/voteService';
-import { t } from 'i18next';
 import { useTranslation } from '@/app/i18n/useTranslation';
 
 type Props = {
@@ -48,7 +46,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
 
   return (
     <div className="container mx-auto max-w-2xl p-6">
-      <h1 className="mb-4 text-lg font-semibold">전체 종합 순위</h1>
+      <h1 className="mb-4 text-lg font-semibold">{t('result.title')}</h1>
       {message && (
         <p className="mb-4 inline-block rounded bg-muted px-3 py-2 text-sm">
           {message}
@@ -56,7 +54,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
       )}
 
       {loading ? (
-        <p className="text-muted-foreground">집계 로딩 중…</p>
+        <p className="text-muted-foreground">{t('result.loading')}</p>
       ) : (
         <ul className="divide-y rounded border">
           {rows.map((r) => {

@@ -11,5 +11,14 @@
   "button.next": "Next",
   "button.back": "Prev",
   "button.submit": "Submit",
-  "button.submitting": "Submitting..."
+  "button.submitting": "Submitting...",
+
+  "intro.title": "Event Information",
+  "intro.description": "Please select the participating country and team to proceed with voting.",
+
+  "country.title": "Select Country",
+
+
+  "result.title": "Overall Rankings",
+  "result.loading": "Loading..."
 }

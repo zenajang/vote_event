@@ -24,7 +24,7 @@ export default function StepCountry({
   const { t } = useTranslation('common');
   return (
     <div className="container mx-auto max-w-xl p-6">
-      <h1 className="text-xl font-semibold mb-4">나라 선택</h1>
+      <h1 className="text-xl font-semibold mb-4">{t('country.title')}</h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {countries.map((c) => {

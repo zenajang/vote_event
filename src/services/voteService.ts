@@ -65,7 +65,7 @@ export async function submitVote(teamId: number): Promise<'ok'> {
 
   if (!user) {
     const e = new Error('unauthorized');
-    // @ts-expect-error
+    // @ts-expect-error : Adding custom code property to Error object for Supabase error handling compatibility
     e.code = '401';
     throw e;
   }
