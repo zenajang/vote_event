@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export type Step = 'intro' | 'country' | 'team' | 'result';
 
@@ -23,12 +23,42 @@ function useSessionState<T>(key: string, initial: T | null) {
   return [value, setValue] as const;
 }
 
+// 안전한 step 관리
+function useStepFromURL() {
+  const [step, setStep] = useState<Step>('intro');
+  
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const stepParam = params.get('step') as Step;
+    if (stepParam && ['intro', 'country', 'team', 'result'].includes(stepParam)) {
+      setStep(stepParam);
+    }
+    
+    // URL 변경 감지
+    const handlePopState = () => {
+      const newParams = new URLSearchParams(window.location.search);
+      const newStep = newParams.get('step') as Step;
+      if (newStep && ['intro', 'country', 'team', 'result'].includes(newStep)) {
+        setStep(newStep);
+      } else {
+        setStep('intro');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  return step;
+}
+
 export function useVoteWizardState() {
   const router = useRouter();
   const pathname = usePathname();
-  const qs = useSearchParams();
-
-  const step = (qs.get('step') as Step) || 'intro';
+  
+  const step = useStepFromURL();
   const [countryId, setCountryId] = useSessionState<number>('countryId', null);
   const [teamId, setTeamId] = useSessionState<number>('teamId', null);
   const [msg, setMsg] = useState<string>('');
