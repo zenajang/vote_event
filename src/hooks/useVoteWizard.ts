@@ -47,7 +47,7 @@ function useStepFromURL() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  return [step, setStep] as const; // ✅ setter를 같이 리턴
+  return [step, setStep] as const;
 }
 
 

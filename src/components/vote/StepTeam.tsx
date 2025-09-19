@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/app/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
@@ -34,6 +35,18 @@ export default function StepTeam({
   loading,
 }: Props) {
   const { t } = useTranslation('common');
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const openConfirm = () => {
+    if (!canSubmit || submitting) return;
+    setConfirmOpen(true);
+  };
+  const closeConfirm = () => setConfirmOpen(false);
+  const confirmAndSubmit = () => {
+    if (submitting) return;
+    setConfirmOpen(false);
+    onSubmit();
+  };
 
   return (
     <div className="container mx-auto max-w-xl p-6">
@@ -135,10 +148,22 @@ export default function StepTeam({
         <Button variant="outline" onClick={onPrev}>
           {t('button.back')}
         </Button>
-        <Button onClick={onSubmit} disabled={!canSubmit || submitting}>
+
+        <Button onClick={openConfirm} disabled={!canSubmit || submitting}>
           {submitting ? t('button.submitting') : t('button.submit')}
         </Button>
       </div>
+
+      <ConfirmSheet
+        open={confirmOpen}
+        onClose={closeConfirm}
+        onConfirm={confirmAndSubmit}
+        busy={submitting}
+        title="제출하시겠습니까?"
+        description="한번 선택 된 팀은 변경이 불가합니다. 투표 진행하시겠습니까?"
+        cancelText="취소"
+        confirmText="투표하기"
+      />
     </div>
   );
 }
@@ -152,3 +177,83 @@ function getInitials(name: string) {
     .map((s) => s[0]?.toUpperCase())
     .join('');
 }
+
+function ConfirmSheet({
+    open,
+    onClose,
+    onConfirm,
+    title,
+    description,
+    cancelText = '취소',
+    confirmText = '확인',
+    busy,
+    } : {
+    open: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    title: string;
+    description?: string;
+    cancelText?: string;
+    confirmText?: string;
+    busy?: boolean;
+  }) {
+    const panelRef = useRef<HTMLDivElement | null>(null);
+
+    // ESC, 바깥 클릭 닫기
+    useEffect(() => {
+      if (!open) return;
+
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') onClose();
+      };
+      const onClick = (e: MouseEvent) => {
+        if (!panelRef.current) return;
+        if (e.target instanceof Node && !panelRef.current.contains(e.target)) {
+          onClose();
+        }
+      };
+      document.addEventListener('keydown', onKey);
+      document.addEventListener('mousedown', onClick);
+      return () => {
+        document.removeEventListener('keydown', onKey);
+        document.removeEventListener('mousedown', onClick);
+      };
+    }, [open, onClose]);
+
+    if (!open) return null;
+
+    return (
+      <div
+        aria-hidden={!open}
+        aria-modal="true"
+        role="dialog"
+        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
+      >
+        {/* Dim */}
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px]" />
+
+        {/* Panel (Bottom Sheet on mobile) */}
+        <div
+          ref={panelRef}
+          className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-background p-5 shadow-xl sm:mx-auto"
+        >
+          {/* Grabber for mobile */}
+          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-muted sm:hidden" />
+
+          <h3 className="text-base font-semibold">{title}</h3>
+          {description && (
+            <p className="mt-2 text-sm text-muted-foreground">{description}</p>
+          )}
+
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <Button variant="outline" onClick={onClose} disabled={busy}>
+              {cancelText}
+            </Button>
+            <Button onClick={onConfirm} disabled={busy}>
+              {busy ? '처리 중…' : confirmText}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }

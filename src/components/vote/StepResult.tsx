@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchOverallRankings, type OverallRow } from '@/services/voteService';
 import { useTranslation } from '@/app/i18n/useTranslation';
+import { regionNameByLocale } from '@/lib/utils';
 
 type Props = {
   message?: string;
@@ -14,7 +15,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
   const [rows, setRows] = useState<OverallRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { t } = useTranslation('common');
+  const { t, lng } = useTranslation('common');
   
   useEffect(() => {
   let cancelled = false;
@@ -22,7 +23,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
   const load = async () => {
     try {
       setLoading(true);
-      const data = await fetchOverallRankings();
+      const data = await fetchOverallRankings(lng);
       if (!cancelled) setRows(data);
     } finally {
       if (!cancelled) setLoading(false);
@@ -65,7 +66,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="w-2 text-right text-sm">{r.overall_rank}</span>
-                    <span className="text-sm">{r.country_name} - {r.team_name}</span>
+                    <span className="text-sm">  {regionNameByLocale(r.country_code,lng)}  - {r.team_name}</span>
                     {r.is_country_champion && (
                       <span className="rounded bg-primary/10 px-2 py-0.5 text-xs">국가 1위</span>
                     )}

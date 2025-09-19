@@ -2,6 +2,7 @@
 
 import { useTranslation } from '@/app/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
+import { regionNameByLocale } from '@/lib/utils';
 
 type Country = { id: number; code: string; name: string };
 
@@ -21,7 +22,7 @@ export default function StepCountry({
   onPrev,
   onNext,
 }: Props) {
-  const { t } = useTranslation('common');
+  const { t, lng } = useTranslation('common');
   return (
     <div className="container mx-auto max-w-xl p-6">
       <h1 className="text-xl font-semibold mb-4">{t('country.title')}</h1>
@@ -36,7 +37,7 @@ export default function StepCountry({
               className="h-12"
               onClick={() => onSelect(c.id)}
             >
-              {c.name}
+              {regionNameByLocale(c.code, lng)}
             </Button>
           );
         })}
