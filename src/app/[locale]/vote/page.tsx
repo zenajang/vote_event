@@ -15,6 +15,7 @@ import StepIntro from '@/components/vote/StepIntro';
 import StepCountry from '@/components/vote/StepCountry';
 import StepTeam from '@/components/vote/StepTeam';
 import StepResult from '@/components/vote/StepResult';
+import { useTranslation } from '@/app/i18n/useTranslation';
 
 export default function VoteWizard() {
   const {
@@ -32,19 +33,20 @@ export default function VoteWizard() {
   const [checkingVote, setCheckingVote] = useState(true);
 
   const currentCountry = useSelected(countries, countryId ?? null);
+  const { lng } = useTranslation('common'); 
 
   // 국가 목록 로드
   useEffect(() => {
     (async () => {
       try {
         setLoadingCountries(true);
-        const list = await fetchCountries();
+        const list = await fetchCountries(lng);
         setCountries(list);
       } finally {
         setLoadingCountries(false);
       }
     })();
-  }, []);
+  }, [lng]);
 
   // 선택한 국가의 팀 목록 로드
   useEffect(() => {
