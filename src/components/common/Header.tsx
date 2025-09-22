@@ -8,6 +8,7 @@ import { User } from '@supabase/supabase-js';
 import LanguageSwitcher from './LanguageSwitcher';
 import { i18nConfig } from '@/app/i18n/settings';
 import { useTranslation } from '@/app/i18n/useTranslation';
+import Image from 'next/image';
 
 function HeaderContent() {
   const supabase = createClient();
@@ -64,18 +65,23 @@ function HeaderContent() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="w-full flex h-16 items-center justify-between px-6">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-semibold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-            {t('header.title')}
-          </h1>
+          <Image 
+            src="/logo.png"   
+            alt="Vote Event Logo"
+            width={100}      
+            height={32}      
+            priority        
+          />
         </div>
       
           <div className="flex items-center space-x-4">            
-            <LanguageSwitcher />
+            
           {user ? (
             <div className="flex items-center space-x-3">
               <span className="text-sm text-muted-foreground">
                 {user.user_metadata?.full_name || user.email}
               </span>
+              <LanguageSwitcher />
               <Button 
                 variant="outline" 
                 size="sm"

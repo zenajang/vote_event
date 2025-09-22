@@ -51,9 +51,9 @@ export default function StepTeam({
   return (
     <div className="container mx-auto max-w-xl p-6">
       <h1 className="text-xl font-semibold mb-2">
-        {country ? `${country.name} 팀 선택` : '팀 선택'}
+        {country ? `${country.name}` : '팀 선택'}
       </h1>
-      <p className="text-sm text-muted-foreground mb-4">한 팀을 선택해 주세요.</p>
+      <p className="text-sm text-muted-foreground mb-4">{t("team.description")}</p>
 
       {/* 세로 일렬 라디오 리스트 */}
       <div role="radiogroup" aria-label="팀 선택 목록" className="space-y-3">

@@ -35,7 +35,6 @@ export default function VoteWizard() {
   const currentCountry = useSelected(countries, countryId ?? null);
   const { lng } = useTranslation('common'); 
 
-  // 국가 목록 로드
   useEffect(() => {
     (async () => {
       try {
@@ -48,7 +47,6 @@ export default function VoteWizard() {
     })();
   }, [lng]);
 
-  // 선택한 국가의 팀 목록 로드
   useEffect(() => {
     (async () => {
       if (!countryId) {
@@ -60,7 +58,6 @@ export default function VoteWizard() {
         setLoadingTeams(true);
         const list = await fetchTeams(countryId);
         setTeams(list);
-        // 이전에 선택한 teamId가 없어진 경우 초기화
         if (teamId && !list.some((t) => t.id === teamId)) setTeamId(null);
       } finally {
         setLoadingTeams(false);
@@ -69,14 +66,13 @@ export default function VoteWizard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryId]);
 
-  // 스텝 가드
   useEffect(() => {
     if (step === 'team' && !countryId) go('country');
   }, [step, countryId, go]);
 
-useEffect(() => {
-  if (step === 'result') { setCheckingVote(false); return; }
-  setCheckingVote(true);
+  useEffect(() => {
+    if (step === 'result') { setCheckingVote(false); return; }
+    setCheckingVote(true);
 
   let cancelled = false;
   (async () => {
@@ -104,7 +100,6 @@ useEffect(() => {
       const voted = await fetchMyVoteTeamId();
       if (!cancelled && voted) setTeamId(voted);
     } catch {
-      // 비로그인/권한 이슈 등은 무시
     }
   })();
 
