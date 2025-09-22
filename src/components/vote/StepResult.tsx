@@ -37,7 +37,7 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
     cancelled = true;
     clearInterval(timer);
   };
-}, [pollMs]);
+}, [lng, pollMs]);
 
 
   const totalVotes = useMemo(

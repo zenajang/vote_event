@@ -36,8 +36,6 @@ function useStepFromURL() {
       const s = params.get('step') as Step;
       setStep(['intro', 'country', 'team', 'result'].includes(s) ? s : 'intro');
     };
-
-    // 최초 1회
     read();
 
     // 뒤/앞으로만 듣던 걸 유지
