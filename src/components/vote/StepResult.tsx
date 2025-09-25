@@ -32,9 +32,8 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
         setErrorMsg('');
         const data = await fetchOverallRankings();
         if (!cancelled) setRows(data ?? []);
-      } catch (e: any) {
-        if (!cancelled) setErrorMsg(e?.message || 'Failed to load rankings');
-        // console.error(e);
+      } catch (e: unknown) {
+         console.error(e);
       } finally {
         if (!cancelled) {
           if (mode === 'initial') setLoading(false);
