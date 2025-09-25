@@ -7,9 +7,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
-type Props = { locale: string };
 
-export default function MainClient({ locale }: Props) {
+export default function MainClient() {
   const supabase = createClient();
   const router = useRouter();
   const pathname = usePathname();

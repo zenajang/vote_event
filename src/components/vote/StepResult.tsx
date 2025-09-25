@@ -51,7 +51,6 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
     };
   }, [pollMs]);
 
-  // ✅ 나라별 최다 득표 팀 직접 계산 (is_country_champion 무의존)
   const championsMap = useMemo(() => {
     const map = new Map<string, OverallRow>(); // country_code -> best row
     for (const r of rows) {
@@ -108,7 +107,6 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
         </div>
       ) : (
         <>
-          {/* ── 상단: 국가별 1위 카드 ─────────────────────────── */}
           <section className="mt-4 mb-6">
             <div className="rounded-2xl bg-white shadow-sm border overflow-hidden">
               {topPerCountry.length === 0 ? (
@@ -158,8 +156,7 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
               )}
             </div>
           </section>
-
-          {/* ── 하단: 나머지 팀 순위 ─────────────────────────── */}
+          
           <section className="mb-10">
             <h3 className="heading2 mb-3 text-center">Remaining Teams in the Rankings</h3>
 
@@ -185,7 +182,7 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
                       <span
                         className={cn(
                           'w-6 text-center font-bold tabular-nums',
-                          rank <= 3 ? 'text-red-600' : 'text-primary'
+                          rank <= 3 ? 'text-primary' : 'text-black'
                         )}
                       >
                         {rank}

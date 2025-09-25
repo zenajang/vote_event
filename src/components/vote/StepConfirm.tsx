@@ -96,7 +96,7 @@ export default function StepConfirm({
   globalRankings = [],
 }: Props) {
   return (
-    <div className="container mx-auto max-w-xl px-6 pt-6">
+    <div className="container mx-auto max-w-xl px-4 pt-6">
       <h1 className="heading3-primary mb-5 text-primary text-center">
         GME Cricket Tournament-2025
       </h1>
@@ -109,22 +109,20 @@ export default function StepConfirm({
           <p className="text-center text5">{message}</p>
 
           {/* 일정/장소 */}
-          <div className="flex items-center gap-2 text-sm mt-5">
+          <div className="flex items-center gap-2 text-sm mt-10">
             <Image src="/images/calendar.png" alt="calendar icon" width={15} height={15} />
             <span className="heading3-secondary">
               {date || '2nd November 2025'}
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm mt-1 mb-5">
-            <Image src="/images/pin.png" alt="pin icon" width={15} height={15} />
+            <Image src="/images/pin.png" alt="pin icon" width={13} height={13} />
             <span className="heading3-secondary">
               {place || 'Incheon International Cricket Stadium'}
             </span>
           </div>
         </div>
 
-        {/* ───────────────────────────────────────── */}
-        {/* 국가별 1위 리스트 */}
         {topTeams.length > 0 && (
           <>
             <h3 className="heading3-secondary mb-3 text-center">
@@ -138,7 +136,6 @@ export default function StepConfirm({
           </>
         )}
 
-        {/* 전체 순위(국가 이미지 {code}_r 매핑) */}
         {globalRankings.length > 0 && (
           <>
             <h3 className="heading3-secondary mb-3 text-center">
@@ -152,8 +149,7 @@ export default function StepConfirm({
           </>
         )}
 
-        {/* 버튼들 */}
-        <div className="flex gap-3 justify-center">
+        <div className="flex gap-3 justify-center mt-10 mb-5">
           {onClose && (
             <Button variant="outline" onClick={onClose}>
               Close

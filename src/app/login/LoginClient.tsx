@@ -1,4 +1,3 @@
-// app/[locale]/login/LoginClient.tsx (Client)
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
