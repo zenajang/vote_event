@@ -1,6 +1,5 @@
 'use client';
 import { createClient } from '@/lib/supabase/client';
-import { regionNameByLocale } from '@/lib/utils';
 
 const supabase = createClient();
 
@@ -18,7 +17,6 @@ export type OverallRow = {
 };
 
 export async function fetchOverallRankings(
-  locale: string,
   limit?: number
 ): Promise<OverallRow[]> {
   let q = supabase.from('overall_rankings').select('*').order('overall_rank', { ascending: true });
@@ -26,23 +24,17 @@ export async function fetchOverallRankings(
   const { data, error } = await q;
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
-    ...row,
-    country_name: regionNameByLocale(row.country_code, locale),
-  }));
+  return (data ?? []);
 }
 
-export async function fetchCountries(locale: string): Promise<Country[]> {
+export async function fetchCountries(): Promise<Country[]> {
   const { data, error } = await supabase
     .from('countries')
     .select('id, code, name')
     .order('id', { ascending: true });
   if (error) throw error;
 
-  return (data ?? []).map((c) => ({
-    ...c,
-    name: regionNameByLocale(c.code, locale),
-  }));
+  return (data ?? [])
 }
 
 export async function fetchTeams(countryId: number): Promise<Team[]> {

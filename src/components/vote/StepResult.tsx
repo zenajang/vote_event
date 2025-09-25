@@ -3,8 +3,8 @@
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { fetchOverallRankings, type OverallRow } from '@/services/voteService';
-import { useTranslation } from '@/app/i18n/useTranslation';
 import { cn, regionNameByLocale } from '@/lib/utils';
+import { Spinner } from '@radix-ui/themes';
 
 type Props = {
   message?: string;
@@ -15,106 +15,138 @@ type Props = {
 const flagSrc = (code: string) =>
   `/images/country/${String(code).toLowerCase()}_r.png`;
 
-export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props) {
+export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props) {
   const [rows, setRows] = useState<OverallRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const { t, lng } = useTranslation('common');
+  const [refreshing, setRefreshing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
+    const load = async (mode: 'initial' | 'refresh' = 'initial') => {
       try {
-        setLoading(true);
-        const data = await fetchOverallRankings(lng);
-        if (!cancelled) setRows(data);
+        if (mode === 'initial') setLoading(true);
+        else setRefreshing(true);
+
+        setErrorMsg('');
+        const data = await fetchOverallRankings();
+        if (!cancelled) setRows(data ?? []);
+      } catch (e: any) {
+        if (!cancelled) setErrorMsg(e?.message || 'Failed to load rankings');
+        // console.error(e);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          if (mode === 'initial') setLoading(false);
+          else setRefreshing(false);
+        }
       }
     };
 
-    load();
-    const timer: ReturnType<typeof setInterval> = setInterval(load, pollMs);
+    load('initial');
+    const timer = setInterval(() => load('refresh'), pollMs);
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [lng, pollMs]);
+  }, [pollMs]);
 
-  const totalVotes = useMemo(
-    () => rows.reduce((sum, r) => sum + r.votes, 0),
-    [rows]
-  );
-
-  const sortedRows = useMemo(
-    () => [...rows].sort((a, b) => b.votes - a.votes),
-    [rows]
-  );
-
-  const topPerCountry = useMemo(() => {
-    return rows
-      .filter((r) => r.is_country_champion)
-      .sort((a, b) => b.votes - a.votes);
+  // ✅ 나라별 최다 득표 팀 직접 계산 (is_country_champion 무의존)
+  const championsMap = useMemo(() => {
+    const map = new Map<string, OverallRow>(); // country_code -> best row
+    for (const r of rows) {
+      const cur = map.get(r.country_code);
+      if (!cur || r.votes > cur.votes) {
+        map.set(r.country_code, r);
+      }
+    }
+    return map;
   }, [rows]);
 
+  const topPerCountry = useMemo(
+    () => Array.from(championsMap.values()).sort((a, b) => b.votes - a.votes),
+    [championsMap]
+  );
+
+  const championTeamIds = useMemo(
+    () => new Set(topPerCountry.map((r) => r.team_id)),
+    [topPerCountry]
+  );
+
+  const remainingSorted = useMemo(() => {
+    const rest = rows.filter((r) => !championTeamIds.has(r.team_id));
+    return rest.sort((a, b) => b.votes - a.votes);
+  }, [rows, championTeamIds]);
+
   return (
-    <div className="container mx-auto max-w-xl px-6 pt-6">
+    <div className="container mx-auto max-w-xl px-3 pt-6">
       <h1 className="heading3-primary text-primary text-center">
         GME Cricket Tournament-2025
       </h1>
-      <h1 className="mt-4 text-center heading2">{t('result.title')}</h1>
+
+      <h1 className="mt-4 text-center heading2 relative">
+        Top Voted Team from Each Country
+        {refreshing && (
+          <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground align-middle">
+            <Spinner size="2" /> Updating…
+          </span>
+        )}
+      </h1>
 
       {message && (
-        <p className="mb-4 inline-block rounded bg-muted px-3 py-2 text-sm">
-          {message}
+        <p className="mb-3 inline-block rounded bg-muted px-3 py-2 text-sm">{message}</p>
+      )}
+      {errorMsg && (
+        <p className="mb-3 inline-block rounded bg-red-50 px-3 py-2 text-sm text-red-600">
+          {errorMsg}
         </p>
       )}
 
       {loading ? (
-        <p className="text-muted-foreground">{t('result.loading')}</p>
+        <div className="py-8 text-center">
+          <Spinner size="3" />
+        </div>
       ) : (
         <>
-        {/* 하나의 카드 안에 국가별 1위들을 리스트로 나열 */}
-          {topPerCountry.length > 0 && (
-            <section className="mt-4 mb-6">
-              <div className="rounded-2xl bg-white shadow-sm border">
+          {/* ── 상단: 국가별 1위 카드 ─────────────────────────── */}
+          <section className="mt-4 mb-6">
+            <div className="rounded-2xl bg-white shadow-sm border overflow-hidden">
+              {topPerCountry.length === 0 ? (
+                <div className="p-4 text-sm text-muted-foreground text-center">
+                  No country champions yet.
+                </div>
+              ) : (
                 <ul className="divide-y">
                   {topPerCountry.map((r) => {
                     const isMine = myTeamId ? r.team_id === myTeamId : false;
                     return (
                       <li
                         key={`top-${r.country_code}`}
-                        className={cn(
-                          'px-4 py-2',
-                          isMine && 'bg-yellow-50'
-                        )}
+                        className={cn('px-4 py-2', isMine && 'bg-yellow-50')}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3 min-w-0">
                             <Image
                               src={flagSrc(r.country_code)}
-                              alt={`${regionNameByLocale(r.country_code, lng)} flag`}
+                              alt={`${regionNameByLocale(r.country_code)} flag`}
                               width={24}
                               height={24}
                               className="rounded-full shrink-0"
                             />
                             <div className="leading-tight min-w-0">
                               <p className="text-sm font-semibold truncate">
-                                {regionNameByLocale(r.country_code, lng)}
+                                {regionNameByLocale(r.country_code)}
                               </p>
                               <p className="text-xs text-muted-foreground truncate">
                                 {r.team_name}
                               </p>
                             </div>
-
-                            {/* 🔹 My Pick 배지 (국가별 1위 카드에도 표시) */}
                             {isMine && (
                               <span className="ml-2 rounded bg-yellow-200 px-2 py-0.5 text-xs shrink-0">
-                                {t('result.myPick') ?? '내 선택'}
+                                My Pick
                               </span>
                             )}
                           </div>
-
                           <span className="text-base font-bold text-primary tabular-nums">
                             {r.votes}
                           </span>
@@ -123,51 +155,64 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
                     );
                   })}
                 </ul>
+              )}
+            </div>
+          </section>
+
+          {/* ── 하단: 나머지 팀 순위 ─────────────────────────── */}
+          <section className="mb-10">
+            <h3 className="heading2 mb-3 text-center">Remaining Teams in the Rankings</h3>
+
+            {remainingSorted.length === 0 ? (
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                No teams remaining after country champions.
               </div>
-            </section>
-          )}
-         <section className='mb-10'>
-            <h3 className="heading2 mb-3 text-center">
-              {t('result.title2') ?? 'Overall Rankings'}
-            </h3>
+            ) : (
+              <div className="space-y-2">
+                {remainingSorted.map((r, idx) => {
+                  const rank = idx + 1;
+                  const isMine = myTeamId ? r.team_id === myTeamId : false;
 
-            <div className="space-y-2">
-              {sortedRows.map((r, idx) => {
-                const rank = idx + 1; 
-                const isMine = myTeamId ? r.team_id === myTeamId : false;
+                  return (
+                    <div
+                      key={`${r.team_id}-${rank}`}
+                      className={cn(
+                        'flex items-center justify-between rounded-xl bg-white border p-3 shadow-sm',
+                        isMine && 'bg-yellow-50',
+                        rank <= 3 && 'border-2 border-red-500'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'w-6 text-center font-bold tabular-nums',
+                          rank <= 3 ? 'text-red-600' : 'text-primary'
+                        )}
+                      >
+                        {rank}
+                      </span>
 
-                return (
-                  <div
-                    key={`${r.team_id}-${rank}`}
-                    className={[
-                      'flex items-center justify-between rounded-xl bg-white shadow-sm border p-3',
-                      isMine ? 'bg-yellow-50' : '',
-                    ].join(' ')}
-                  >
-                    <span className="w-6 text-center font-bold text-primary">{rank}</span>
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <Image
-                        src={flagSrc(r.country_code)}
-                        alt={`${regionNameByLocale(r.country_code, lng)} flag`}
-                        width={24}
-                        height={24}
-                        className="rounded-full shrink-0"
-                      />
-                      <div className="leading-tight min-w-0">
-                        <p className="text-sm font-semibold truncate">
-                          {regionNameByLocale(r.country_code, lng)}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">{r.team_name}</p>
-                      </div>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <Image
+                          src={flagSrc(r.country_code)}
+                          alt={`${regionNameByLocale(r.country_code)} flag`}
+                          width={24}
+                          height={24}
+                          className="rounded-full shrink-0"
+                        />
+                        <div className="leading-tight min-w-0">
+                          <p className="text-sm font-semibold truncate">
+                            {regionNameByLocale(r.country_code)}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">{r.team_name}</p>
+                        </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
                         {isMine && (
-                          <span className="rounded bg-yellow-200 px-2 py-0.5 text-xs">
-                            {t('result.myPick')}
+                          <span className="rounded bg-yellow-200 px-2 py-0.5 text-xs shrink-0">
+                            My Pick
                           </span>
                         )}
                       </div>
-                    </div>
+
                       <div className="text-right shrink-0">
                         <div className="tabular-nums text2">{r.votes}</div>
                       </div>
@@ -175,10 +220,10 @@ export default function StepResult({ message, myTeamId, pollMs = 60000 }: Props)
                   );
                 })}
               </div>
-            </section>
-
-            </>
-          )}
-        </div>
-      );
-    }
+            )}
+          </section>
+        </>
+      )}
+    </div>
+  );
+}

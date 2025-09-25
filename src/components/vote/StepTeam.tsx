@@ -2,9 +2,8 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { useTranslation } from '@/app/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, regionNameByLocale } from '@/lib/utils';
 import ConfirmSheet from '../common/ConfirmSheet';
 
 type Country = { id: number; code: string; name: string };
@@ -45,7 +44,6 @@ function TeamImage({
   return (
     <div
       className={cn(
-        // 고정 슬롯: 항상 회색 박스 높이 확보
         'relative w-full h-30 rounded-xl bg-muted overflow-hidden',
         'aspect-[4/3] sm:aspect-[16/9] min-h-[9rem] md:min-h-[12rem]',
         'grid place-items-center px-3 text-center',
@@ -90,9 +88,10 @@ export default function StepTeam({
   canSubmit,
   loading,
 }: Props) {
-  const { t } = useTranslation('common');
 
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const countryLabel = country ? regionNameByLocale(country.code) : 'Select Team';
   const openConfirm = () => {
     if (!canSubmit || submitting) return;
     setConfirmOpen(true);
@@ -104,12 +103,12 @@ export default function StepTeam({
   };
 
   return (
-    <div className="container mx-auto max-w-xl px-6 pt-6">
+    <div className="container mx-auto max-w-xl px-3 pt-6">
       <h1 className="heading3-primary mb-5 text-primary text-center">
         GME Cricket Tournament-2025
       </h1>
       <h1 className="h1-onboarding mb-4 text-center">
-        {country ? `${country.name}` : '팀 선택'}
+        {country ? countryLabel : 'Select Team'}
       </h1>
 
       <div role="radiogroup" aria-label="팀 선택 목록" className="space-y-3">
@@ -164,10 +163,10 @@ export default function StepTeam({
 
       <div className="mt-6 flex justify-between mb-10">
         <Button variant="outline" className="btn-prev" onClick={onPrev}>
-          {t('button.back')}
+          Back
         </Button>
         <Button onClick={openConfirm} className="btn-next" disabled={!canSubmit || submitting}>
-          {submitting ? t('button.submitting') : t('button.submit')}
+          {submitting ? 'Submitting': 'Submit'}
         </Button>
       </div>
 
@@ -176,10 +175,10 @@ export default function StepTeam({
         onClose={() => setConfirmOpen(false)}
         onConfirm={confirmAndSubmit}
         busy={submitting}
-        title="제출하시겠습니까?"
-        description="한번 선택 된 팀은 변경이 불가합니다. 투표 진행하시겠습니까?"
-        cancelText="취소"
-        confirmText="투표하기"
+        title="Do you want to submit?"
+        description="Once you select a team, it cannot be changed. Do you want to proceed with the vote?"
+        cancelText="Cancel"
+        confirmText="Vote"
       />
     </div>
   );

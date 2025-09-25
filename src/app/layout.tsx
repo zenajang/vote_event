@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import '@radix-ui/themes/styles.css';
+import { Theme } from "@radix-ui/themes"; 
 import Header from "@/components/common/Header";
 
 const inter = Inter({
@@ -26,15 +28,15 @@ export default async function RootLayout({
 }>) {
   
   return (
-    <html lang="ko">
+    <html lang="en">
       <body
         className={`${inter.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground`}
         suppressHydrationWarning={true}
       >
-       <Header/>
-        <main className="flex-1">
-          {children}
-        </main>
+        <Theme appearance="light" accentColor="indigo" radius="large">
+          <Header />
+          <main className="flex-1">{children}</main>
+        </Theme>
       </body>
     </html>
   );

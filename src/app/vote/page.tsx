@@ -14,7 +14,6 @@ import { useVoteWizardState, useSelected} from '@/hooks/useVoteWizard';
 import StepCountry from '@/components/vote/StepCountry';
 import StepTeam from '@/components/vote/StepTeam';
 import StepResult from '@/components/vote/StepResult';
-import { useTranslation } from '@/app/i18n/useTranslation';
 import StepConfirm from '@/components/vote/StepConfirm';
 import { useRouter } from 'next/navigation';
 
@@ -35,19 +34,23 @@ export default function VoteWizard() {
   const [checkingVote, setCheckingVote] = useState(true);
 
   const currentCountry = useSelected(countries, countryId ?? null);
-  const { lng } = useTranslation('common'); 
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoadingCountries(true);
-        const list = await fetchCountries(lng);
-        setCountries(list);
-      } finally {
-        setLoadingCountries(false);
-      }
-    })();
-  }, [lng]);
+useEffect(() => {
+  let alive = true;
+  (async () => {
+    try {
+      setLoadingCountries(true);
+      const list = await fetchCountries();
+      if (!alive) return;
+      setCountries(list);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      if (alive) setLoadingCountries(false);
+    }
+  })();
+  return () => { alive = false; };
+}, []);
 
   useEffect(() => {
     (async () => {
@@ -82,7 +85,6 @@ export default function VoteWizard() {
       const votedTeamId = await fetchMyVoteTeamId();
       if (!cancelled && votedTeamId) {
         setTeamId(votedTeamId);
-        setMsg('투표를 완료하셨습니다.');
         go('confirm');
       }
     } finally {
@@ -121,7 +123,6 @@ const onSubmit = async () => {
 
   try {
     await submitVote(teamId);
-    setMsg('투표 완료!');
     go('confirm');
     return;
   } catch (e: unknown) {
@@ -131,7 +132,6 @@ const onSubmit = async () => {
         const votedTeamId = await fetchMyVoteTeamId();
         if (votedTeamId) setTeamId(votedTeamId);
       } catch {}
-      setMsg('투표를 완료하셨습니다.');
       go('confirm');
       return;
     } else if (error?.code === '401' || error?.message === 'unauthorized') {

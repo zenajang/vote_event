@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-import { i18nConfig } from '@/app/i18n/settings';
 import { createServerAction } from '@/lib/supabase/server-action';
 
 export async function GET(req: Request) {
@@ -14,7 +13,7 @@ export async function GET(req: Request) {
   }
 
   const jar = await cookies();
-  const next = jar.get('next')?.value || `/${i18nConfig.defaultLocale}/vote`;
+  const next = jar.get('next')?.value || `/vote`;
   jar.set('next', '', { path: '/', maxAge: 0 });
 
   return NextResponse.redirect(new URL(next, url.origin));

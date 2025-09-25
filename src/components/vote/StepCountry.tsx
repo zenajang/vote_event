@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslation } from '@/app/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
 import { cn, regionNameByLocale } from '@/lib/utils';
 import Image from 'next/image';
@@ -24,10 +23,9 @@ export default function StepCountry({
   onPrev,
   onNext,
 }: Props) {
-  const { t, lng } = useTranslation('common');
   return (
     <>
-    <div className="container mx-auto max-w-xl px-6 pt-6">
+    <div className="container mx-auto max-w-xl px-3 pt-6">
       <h1 className="heading3-primary text-primary text-center">
           GME Cricket Tournament-2025
       </h1>    
@@ -60,12 +58,12 @@ export default function StepCountry({
         </div>
 
       </section>
-      <h1 className="heading3-primary mb-4">{t('country.title')}</h1>
+      <h1 className="heading3-primary mb-4">Please Select Your Country</h1>
 
       <div className="grid grid-cols-1 gap-3">
         {countries.map((c) => {
           const active = selectedCountryId === c.id;
-          const label = regionNameByLocale(c.code, lng);
+          const label = regionNameByLocale(c.code);
 
           return (
             <Button
@@ -95,10 +93,10 @@ export default function StepCountry({
 
       <div className="mt-6 flex justify-between">
         <Button variant="outline" className="btn-prev" onClick={onPrev}>
-          {t('button.back')}
+          Back
         </Button>
         <Button onClick={onNext} className="btn-next" disabled={!selectedCountryId}>
-          {t('button.next')}
+          Next
         </Button>
       </div>
     </div>

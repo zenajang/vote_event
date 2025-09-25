@@ -5,11 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function regionNameByLocale(code: string, locale: string) {
+export function regionNameByLocale(code: string) {
   try {
-    const dn = new Intl.DisplayNames([locale], { type: "region" })
-    return dn.of(code.toUpperCase()) ?? code
+    const dn = new Intl.DisplayNames(['en'], { type: 'region' });
+    return dn.of(code.toUpperCase()) ?? code;
   } catch {
-    return code
+    return code;
   }
 }

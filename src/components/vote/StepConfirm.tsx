@@ -4,27 +4,27 @@ import Image from 'next/image';
 import { Button } from '../ui/button';
 
 type TopTeam = {
-  country: string;          // 예: "Bangladesh"
-  countryCode: string;      // 예: "bd"
-  team: string;             // 예: "Team A"
-  votes: number;            // 예: 130
+  country: string;        
+  countryCode: string; 
+  team: string;            
+  votes: number;      
 };
 
 type GlobalRank = {
-  country: string;          // 예: "India"
-  countryCode: string;      // 예: "in"
-  team: string;             // 예: "Team A" (팀명은 표시에만 사용)
-  votes: number;            // 예: 125
+  country: string;        
+  countryCode: string; 
+  team: string;           
+  votes: number;      
 };
 
 type Props = {
   onViewRankings: () => void;
   onClose?: () => void;
-  date?: string;         // "2nd November 2025"
-  place?: string;        // "Incheon International Cricket Stadium"
-  message?: string;      // 기본 안내문
-  topTeams?: TopTeam[];          // 나라별 1위 목록
-  globalRankings?: GlobalRank[]; // 전체 순위 목록(득표수 내림차순)
+  date?: string;        
+  place?: string;  
+  message?: string;
+  topTeams?: TopTeam[];       
+  globalRankings?: GlobalRank[];
 };
 
 /** 국가 플래그 경로: /images/country/{code}_r.png */

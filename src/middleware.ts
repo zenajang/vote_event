@@ -52,9 +52,7 @@ export async function middleware(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    const seg0 = pathname.split('/').filter(Boolean)[0]
-    const login = /^[a-z]{2}(?:-[A-Z]{2})?$/.test(seg0) ? `/${seg0}/login` : '/login'
-    const url = new URL(login, req.url)
+    const url = new URL('/login', req.url)
     url.searchParams.set('redirect', pathname + search)
     return NextResponse.redirect(url)
   }

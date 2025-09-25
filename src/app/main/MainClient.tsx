@@ -23,9 +23,9 @@ export default function MainClient({ locale }: Props) {
   const handleNext = () => {
     const current = pathname + (qs?.toString() ? `?${qs}` : "");
     if (!user) {
-      router.push(`/${locale}/login?redirect=${encodeURIComponent(current)}`);
+      router.push(`/login?redirect=${encodeURIComponent(current)}`);
     } else {
-      router.push(`/${locale}/vote`);
+      router.push(`/vote`);
     }
   };
 

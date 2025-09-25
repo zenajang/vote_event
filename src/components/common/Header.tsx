@@ -5,9 +5,6 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { User } from '@supabase/supabase-js';
-import LanguageSwitcher from './LanguageSwitcher';
-import { i18nConfig } from '@/app/i18n/settings';
-import { useTranslation } from '@/app/i18n/useTranslation';
 import Image from 'next/image';
 
 function HeaderContent() {
@@ -18,13 +15,8 @@ function HeaderContent() {
   const search = searchParams?.toString() || '';
   const [user, setUser] = useState<User | null>(null);
 
-  const first = pathname.split('/')[1] || '';
-  const LOCALES = i18nConfig.locales as readonly string[];
-  const locale = LOCALES.includes(first) ? first : null;
-  const isLoginPage = pathname === '/login' || (locale ? pathname === `/${locale}/login` : false);
+  const isLoginPage = pathname === '/login';
   
-
-  const { t } = useTranslation('common');
 
    useEffect(() => {
     let mounted = true;
@@ -49,7 +41,7 @@ function HeaderContent() {
   };
 
   const goLogin = () => {
-    const loginPath = locale ? `/${locale}/login` : '/login';
+    const loginPath ='/login';
     const current = pathname + (search ? `?${search}` : '');
     router.push(`${loginPath}?redirect=${encodeURIComponent(current)}`);
   };
@@ -57,9 +49,6 @@ function HeaderContent() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-[#E81818]">
       <div className="relative flex h-12 items-center justify-center px-6">
-        <div className="absolute left-3 inset-y-0 flex items-center">
-          <LanguageSwitcher />
-        </div>
         <div className="flex items-center justify-center">
           <Image
             src="/images/logo.png"
@@ -74,18 +63,13 @@ function HeaderContent() {
           {!isLoginPage && (
             user ? (
               <div className="flex items-center gap-3">
-             {/*   <span className="text-sm text-white/90">
-                {Array.from(user.user_metadata?.full_name || user.email || '').length > 4
-                  ? Array.from(user.user_metadata?.full_name || user.email || '').slice(0, 4).join('') + '…'
-                : user.user_metadata?.full_name || user.email || ''}
-              </span> */}
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={logout}
                   className="h-7 px-3 text-[#E81818] bg-white hover:bg-white/90"
                 >
-                  {t('header.logout')}
+                  Log Out
                 </Button>
               </div>
             ) : (
@@ -95,7 +79,7 @@ function HeaderContent() {
                 onClick={goLogin}
                 className="h-7 px-3 text-[#E81818] bg-white hover:bg-white/90"
               >
-                {t('header.login')}
+                Log In
               </Button>
             )
           )}
