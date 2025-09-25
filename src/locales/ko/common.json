@@ -16,10 +16,12 @@
   "intro.title": "이벤트 안내",
   "intro.description": "참여 국가와 팀을 선택하고 투표를 진행해주세요.",
 
-  "country.title": "나라 선택",
+  "country.title": "국가 선택",
 
   "team.description": "투표할 한 팀을 선택해주세요.",
 
-  "result.title": "전체 종합 순위",
+  "result.title": "각 국가별 1위 팀",
+  "result.title2": "전체 종합 순위",
+  "result.myPick": "내 선택",
   "result.loading": "로딩 중..."
 }

@@ -11,11 +11,12 @@ import {
 } from '@/services/voteService';
 import { useVoteWizardState, useSelected} from '@/hooks/useVoteWizard';
 
-import StepIntro from '@/components/vote/StepIntro';
 import StepCountry from '@/components/vote/StepCountry';
 import StepTeam from '@/components/vote/StepTeam';
 import StepResult from '@/components/vote/StepResult';
 import { useTranslation } from '@/app/i18n/useTranslation';
+import StepConfirm from '@/components/vote/StepConfirm';
+import { useRouter } from 'next/navigation';
 
 export default function VoteWizard() {
   const {
@@ -26,6 +27,7 @@ export default function VoteWizard() {
     submitting, setSubmitting
   } = useVoteWizardState();
 
+  const router = useRouter();
   const [countries, setCountries] = useState<Country[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loadingCountries, setLoadingCountries] = useState(true);
@@ -71,7 +73,7 @@ export default function VoteWizard() {
   }, [step, countryId, go]);
 
   useEffect(() => {
-    if (step === 'result') { setCheckingVote(false); return; }
+    if (step === 'result'|| step === 'confirm') { setCheckingVote(false); return; }
     setCheckingVote(true);
 
   let cancelled = false;
@@ -81,7 +83,7 @@ export default function VoteWizard() {
       if (!cancelled && votedTeamId) {
         setTeamId(votedTeamId);
         setMsg('투표를 완료하셨습니다.');
-        go('result');
+        go('confirm');
       }
     } finally {
       if (!cancelled) setCheckingVote(false);
@@ -120,7 +122,7 @@ const onSubmit = async () => {
   try {
     await submitVote(teamId);
     setMsg('투표 완료!');
-    go('result');
+    go('confirm');
     return;
   } catch (e: unknown) {
     const error = e as { code?: string; message?: string };
@@ -130,7 +132,7 @@ const onSubmit = async () => {
         if (votedTeamId) setTeamId(votedTeamId);
       } catch {}
       setMsg('투표를 완료하셨습니다.');
-      go('result');
+      go('confirm');
       return;
     } else if (error?.code === '401' || error?.message === 'unauthorized') {
       setMsg('로그인이 필요합니다.');
@@ -143,10 +145,6 @@ const onSubmit = async () => {
 };
 
 
-  if (step === 'intro') {
-    return <StepIntro onNext={() => go('country')} />;
-  }
-
   if (step === 'country') {
     return (
       <StepCountry
@@ -154,7 +152,7 @@ const onSubmit = async () => {
         loading={loadingCountries}
         selectedCountryId={countryId ?? null}
         onSelect={(id) => setCountryId(id)}
-        onPrev={() => go('intro')}
+        onPrev={() => router.push('/main')} 
         onNext={() => go('team')}
       />
     );
@@ -175,6 +173,9 @@ const onSubmit = async () => {
         canSubmit={!!teamId && teams.length > 0}
       />
     );
+  }
+ if (step === 'confirm') {
+    return <StepConfirm onViewRankings={() => go('result')} />;
   }
 
   if (step === 'result') {

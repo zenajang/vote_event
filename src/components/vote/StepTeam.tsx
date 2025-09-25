@@ -1,10 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from '@/app/i18n/useTranslation';
 import { Button } from '@/components/ui/button';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
+import ConfirmSheet from '../common/ConfirmSheet';
 
 type Country = { id: number; code: string; name: string };
 type Team = { id: number; name: string; country_id: number; logoUrl?: string };
@@ -21,6 +22,61 @@ type Props = {
   canSubmit: boolean;
   loading?: boolean;
 };
+function TeamImage({
+  countryCode,
+  teamId,
+  teamName,
+  logoUrl,
+  className,
+}: {
+  countryCode?: string;
+  teamId: number;
+  teamName: string;
+  logoUrl?: string;
+  className?: string;
+}) {
+  const [error, setError] = useState(false);
+
+  const localSrc =
+    countryCode ? `/images/team/${String(countryCode).toLowerCase()}/${teamId}.png` : '';
+
+  const src = !error ? (localSrc || logoUrl || '') : '';
+
+  return (
+    <div
+      className={cn(
+        // 고정 슬롯: 항상 회색 박스 높이 확보
+        'relative w-full h-30 rounded-xl bg-muted overflow-hidden',
+        'aspect-[4/3] sm:aspect-[16/9] min-h-[9rem] md:min-h-[12rem]',
+        'grid place-items-center px-3 text-center',
+        className
+      )}
+    >
+      {src && !error && (
+        <Image
+          fill
+          src={src}
+          alt={`${teamName} photo`}
+          className="object-cover"
+          onError={() => {
+            if (src === localSrc && logoUrl) {
+              setError(true);
+            } else {
+              setError(true);
+            }
+          }}
+          key={`${teamId}-${error ? 'fallback' : 'img'}`}
+        />
+      )}
+
+      {(!src || error) && (
+        <span className="text-sm font-semibold text-foreground/70 leading-tight line-clamp-2">
+          {teamName}
+        </span>
+      )}
+    </div>
+  );
+}
 
 export default function StepTeam({
   country,
@@ -41,7 +97,6 @@ export default function StepTeam({
     if (!canSubmit || submitting) return;
     setConfirmOpen(true);
   };
-  const closeConfirm = () => setConfirmOpen(false);
   const confirmAndSubmit = () => {
     if (submitting) return;
     setConfirmOpen(false);
@@ -49,13 +104,14 @@ export default function StepTeam({
   };
 
   return (
-    <div className="container mx-auto max-w-xl p-6">
-      <h1 className="text-xl font-semibold mb-2">
+    <div className="container mx-auto max-w-xl px-6 pt-6">
+      <h1 className="heading3-primary mb-5 text-primary text-center">
+        GME Cricket Tournament-2025
+      </h1>
+      <h1 className="h1-onboarding mb-4 text-center">
         {country ? `${country.name}` : '팀 선택'}
       </h1>
-      <p className="text-sm text-muted-foreground mb-4">{t("team.description")}</p>
 
-      {/* 세로 일렬 라디오 리스트 */}
       <div role="radiogroup" aria-label="팀 선택 목록" className="space-y-3">
         {loading
           ? Array.from({ length: 4 }).map((_, idx) => (
@@ -74,89 +130,50 @@ export default function StepTeam({
                 selectedTeamId == null ? (idx === 0 ? 0 : -1) : active ? 0 : -1;
 
               return (
-                <button
+                <Button
                   key={team.id}
-                  type="button"
+                  variant="outline"
                   role="radio"
                   aria-checked={active}
                   tabIndex={tabIndex}
                   onClick={() => onSelect(team.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onSelect(team.id);
-                    }
-                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                      e.preventDefault();
-                      const dir = e.key === 'ArrowDown' ? 1 : -1;
-                      const radios = Array.from(
-                        document.querySelectorAll<HTMLButtonElement>('[role="radio"]'),
-                      );
-                      const nextIndex = (idx + dir + radios.length) % radios.length;
-                      radios[nextIndex]?.focus();
-                    }
-                  }}
-                  className={clsx(
-                    'w-full h-16 rounded-xl px-4',
-                    'flex items-center justify-between',
-                    'border transition-colors',
-                    active
-                      ? 'border-primary/60 bg-primary/5 ring-2 ring-primary/30'
-                      : 'border-border hover:bg-muted/50',
+                  className={cn(
+                    'w-full h-auto p-0 !items-stretch !justify-start flex flex-col text-left',
+                    'rounded-2xl gap-2 bg-card hover:bg-transparent hover:text-inherit',
+                    'border border-input shadow-[0_6px_10px_rgba(0,0,0,0.14)] hover:shadow-[0_10px_24px_rgba(0,0,0,0.12)]',
+                    active && 'border-2 border-primary'
                   )}
                 >
-                  {/* 왼쪽: 팀 이름 (+ 국가명 보조) */}
-                  <div className="text-left">
-                    <div className="text-base font-medium">{team.name}</div>
-                    {country?.name && (
-                      <div className="text-xs text-muted-foreground">{country.name}</div>
-                    )}
+                  <div className={cn('w-full overflow-hidden rounded-xl p-2')}>
+                    <TeamImage
+                      countryCode={country?.code}
+                      teamId={team.id}
+                      teamName={team.name}
+                      logoUrl={team.logoUrl}
+                    />
                   </div>
-
-                  {/* 오른쪽: 팀 사진 (없으면 이니셜) */}
-                  <div
-                    className={clsx(
-                      'shrink-0 size-12 rounded-full overflow-hidden ring-1',
-                      active ? 'ring-primary/50' : 'ring-border',
-                    )}
-                    aria-hidden
-                  >
-                    {team.logoUrl ? (
-                      <Image
-                        src={team.logoUrl}
-                        alt={`${team.name} logo`}
-                        width={48}
-                        height={48}
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <div className="w-full h-full grid place-items-center bg-muted text-foreground/70 text-sm font-semibold">
-                        {getInitials(team.name)}
-                      </div>
-                    )}
+                  <div className="items-center flex flex-col mb-3">
+                    <div className={cn('text2', active && 'text-primary')}>{team.name}</div>
                   </div>
-                </button>
+                </Button>
               );
             })}
       </div>
 
-      {msg && (
-        <p className="mt-4 text-sm rounded bg-muted px-3 py-2 inline-block">{msg}</p>
-      )}
+      {msg && <p className="mt-4 text-sm rounded bg-muted px-3 py-2 inline-block">{msg}</p>}
 
-      <div className="mt-6 flex justify-between">
-        <Button variant="outline" onClick={onPrev}>
+      <div className="mt-6 flex justify-between mb-10">
+        <Button variant="outline" className="btn-prev" onClick={onPrev}>
           {t('button.back')}
         </Button>
-
-        <Button onClick={openConfirm} disabled={!canSubmit || submitting}>
+        <Button onClick={openConfirm} className="btn-next" disabled={!canSubmit || submitting}>
           {submitting ? t('button.submitting') : t('button.submit')}
         </Button>
       </div>
 
       <ConfirmSheet
         open={confirmOpen}
-        onClose={closeConfirm}
+        onClose={() => setConfirmOpen(false)}
         onConfirm={confirmAndSubmit}
         busy={submitting}
         title="제출하시겠습니까?"
@@ -167,93 +184,3 @@ export default function StepTeam({
     </div>
   );
 }
-
-/** 팀명 이니셜 (예: "FC Seoul" → "FS") */
-function getInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((s) => s[0]?.toUpperCase())
-    .join('');
-}
-
-function ConfirmSheet({
-    open,
-    onClose,
-    onConfirm,
-    title,
-    description,
-    cancelText = '취소',
-    confirmText = '확인',
-    busy,
-    } : {
-    open: boolean;
-    onClose: () => void;
-    onConfirm: () => void;
-    title: string;
-    description?: string;
-    cancelText?: string;
-    confirmText?: string;
-    busy?: boolean;
-  }) {
-    const panelRef = useRef<HTMLDivElement | null>(null);
-
-    // ESC, 바깥 클릭 닫기
-    useEffect(() => {
-      if (!open) return;
-
-      const onKey = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') onClose();
-      };
-      const onClick = (e: MouseEvent) => {
-        if (!panelRef.current) return;
-        if (e.target instanceof Node && !panelRef.current.contains(e.target)) {
-          onClose();
-        }
-      };
-      document.addEventListener('keydown', onKey);
-      document.addEventListener('mousedown', onClick);
-      return () => {
-        document.removeEventListener('keydown', onKey);
-        document.removeEventListener('mousedown', onClick);
-      };
-    }, [open, onClose]);
-
-    if (!open) return null;
-
-    return (
-      <div
-        aria-hidden={!open}
-        aria-modal="true"
-        role="dialog"
-        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
-      >
-        {/* Dim */}
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px]" />
-
-        {/* Panel (Bottom Sheet on mobile) */}
-        <div
-          ref={panelRef}
-          className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-background p-5 shadow-xl sm:mx-auto"
-        >
-          {/* Grabber for mobile */}
-          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-muted sm:hidden" />
-
-          <h3 className="text-base font-semibold">{title}</h3>
-          {description && (
-            <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-          )}
-
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            <Button variant="outline" onClick={onClose} disabled={busy}>
-              {cancelText}
-            </Button>
-            <Button onClick={onConfirm} disabled={busy}>
-              {busy ? '처리 중…' : confirmText}
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }

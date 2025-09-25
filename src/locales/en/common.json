@@ -16,10 +16,12 @@
   "intro.title": "Event Information",
   "intro.description": "Please select the participating country and team to proceed with voting.",
 
-  "country.title": "Select Country",
+  "country.title": "Please Select Your Country",
 
   "team.description": "Select a team to vote.",
 
-  "result.title": "Overall Rankings",
+  "result.title": "Top Voted Team from Each Country",
+  "result.title2": "Remaining Teams in the Rankings",
+  "result.myPick": "My Pick",
   "result.loading": "Loading..."
 }

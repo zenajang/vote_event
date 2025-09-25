@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
-export type Step = 'intro' | 'country' | 'team' | 'result';
+export type Step = 'country' | 'team' | 'confirm' | 'result';
 
 function useSessionState<T>(key: string, initial: T | null) {
   const [value, setValue] = useState<T | null>(null);
@@ -26,7 +26,7 @@ function useSessionState<T>(key: string, initial: T | null) {
 // 안전한 step 관리
 // useStepFromURL 기존
 function useStepFromURL() {
-  const [step, setStep] = useState<Step>('intro');
+  const [step, setStep] = useState<Step>('country');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -34,7 +34,7 @@ function useStepFromURL() {
     const read = () => {
       const params = new URLSearchParams(window.location.search);
       const s = params.get('step') as Step;
-      setStep(['intro', 'country', 'team', 'result'].includes(s) ? s : 'intro');
+      setStep([ 'country', 'team','confirm', 'result'].includes(s) ? s : 'country');
     };
     read();
 
@@ -75,7 +75,7 @@ export function useVoteWizardState() {
       sessionStorage.removeItem('countryId');
       sessionStorage.removeItem('teamId');
     }
-    go('intro');
+    go('country');
   }, [go, setCountryId, setTeamId]);
 
   return {

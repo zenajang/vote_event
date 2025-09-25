@@ -37,11 +37,11 @@ function LanguageSwitcherContent() {
     <select
       value={value}
       onChange={onChange}
-      className="h-8 px-2 border rounded-md text-black"
+      className="h-7 px-2 border rounded-md text-white"
       aria-label="Select language"
     >
       {LOCALES.map(l => (
-        <option key={l} value={l}>{l.toUpperCase()}</option>
+        <option key={l} value={l}  className="text-black" >{l.toUpperCase()}</option>
       ))}
     </select>
   );

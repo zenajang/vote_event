@@ -22,22 +22,25 @@ function HeaderContent() {
   const LOCALES = i18nConfig.locales as readonly string[];
   const locale = LOCALES.includes(first) ? first : null;
   const isLoginPage = pathname === '/login' || (locale ? pathname === `/${locale}/login` : false);
+  
 
   const { t } = useTranslation('common');
 
-  useEffect(() => {
-    const getUser = async () => {
+   useEffect(() => {
+    let mounted = true;
+    (async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    
-    getUser();
+      if (mounted) setUser(user);
+    })();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_evt, session) => {
+      if (mounted) setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [supabase.auth]);
 
   const logout = async () => {
@@ -51,55 +54,50 @@ function HeaderContent() {
     router.push(`${loginPath}?redirect=${encodeURIComponent(current)}`);
   };
 
-  if (isLoginPage) {
-    return (
-      <header className="w-full border-b bg-background/95">
-        <div className="h-12 flex items-center justify-end px-4">
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-black/10 bg-[#E81818]">
+      <div className="relative flex h-12 items-center justify-center px-6">
+        <div className="absolute left-3 inset-y-0 flex items-center">
           <LanguageSwitcher />
         </div>
-      </header>
-    );
-  }
-
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="w-full flex h-16 items-center justify-between px-6">
-        <div className="flex items-center space-x-4">
-          <Image 
-            src="/logo.png"   
+        <div className="flex items-center justify-center">
+          <Image
+            src="/images/logo.png"
             alt="Vote Event Logo"
-            width={100}      
-            height={32}      
-            priority        
+            width={65}
+            height={18}
+            priority
           />
         </div>
-      
-          <div className="flex items-center space-x-4">            
-            
-          {user ? (
-            <div className="flex items-center space-x-3">
-              <span className="text-sm text-muted-foreground">
-                {user.user_metadata?.full_name || user.email}
-              </span>
-              <LanguageSwitcher />
-              <Button 
-                variant="outline" 
+
+        <div className="absolute right-3 inset-y-0 flex items-center">
+          {!isLoginPage && (
+            user ? (
+              <div className="flex items-center gap-3">
+             {/*   <span className="text-sm text-white/90">
+                {Array.from(user.user_metadata?.full_name || user.email || '').length > 4
+                  ? Array.from(user.user_metadata?.full_name || user.email || '').slice(0, 4).join('') + '…'
+                : user.user_metadata?.full_name || user.email || ''}
+              </span> */}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={logout}
+                  className="h-7 px-3 text-[#E81818] bg-white hover:bg-white/90"
+                >
+                  {t('header.logout')}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="secondary"
                 size="sm"
-                onClick={logout}
-                className="h-8 px-2 hover:bg-muted hover:text-muted-foreground transition-colors"
+                onClick={goLogin}
+                className="h-7 px-3 text-[#E81818] bg-white hover:bg-white/90"
               >
-                {t('header.logout')}
+                {t('header.login')}
               </Button>
-            </div>
-          ) : (
-            <Button 
-              variant="default" 
-              size="sm"
-              onClick={goLogin}
-              className="h-8 px-2"
-            >
-              {t('header.login')}
-            </Button>
+            )
           )}
         </div>
       </div>
@@ -109,7 +107,7 @@ function HeaderContent() {
 
 export default function Header() {
   return (
-    <Suspense fallback={<div className="h-16 w-full bg-gray-100 animate-pulse" />}>
+    <Suspense fallback={<div className="h-16 w-full bg-gray-100 animate-pulse" />} >
       <HeaderContent />
     </Suspense>
   );
