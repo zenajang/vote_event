@@ -86,7 +86,7 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
         Top Voted Team from Each Country
         {refreshing && (
           <span className="ml-2 inline-flex items-center gap-1 text-xs text-muted-foreground align-middle">
-            <Spinner size="2" /> Updating…
+            <Spinner size="3" />
           </span>
         )}
       </h1>
@@ -113,42 +113,44 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
                   No country champions yet.
                 </div>
               ) : (
-                <ul className="divide-y">
+                <ul>
                   {topPerCountry.map((r) => {
                     const isMine = myTeamId ? r.team_id === myTeamId : false;
                     return (
-                      <li
-                        key={`top-${r.country_code}`}
-                        className={cn('px-4 py-2', isMine && 'bg-yellow-50')}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 min-w-0">
-                            <Image
-                              src={flagSrc(r.country_code)}
-                              alt={`${regionNameByLocale(r.country_code)} flag`}
-                              width={24}
-                              height={24}
-                              className="rounded-full shrink-0"
-                            />
-                            <div className="leading-tight min-w-0">
-                              <p className="text-sm font-semibold truncate">
-                                {regionNameByLocale(r.country_code)}
-                              </p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {r.team_name}
-                              </p>
-                            </div>
-                            {isMine && (
-                              <span className="ml-2 rounded bg-yellow-200 px-2 py-0.5 text-xs shrink-0">
-                                My Pick
-                              </span>
-                            )}
-                          </div>
+                    <li
+                      key={`top-${r.country_code}`}
+                      className={cn('px-4 py-2', isMine && 'bg-yellow-50')}
+                    >
+                      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Image
+                            src={flagSrc(r.country_code)}
+                            alt={`${regionNameByLocale(r.country_code)} flag`}
+                            width={36}
+                            height={36}
+                            className="rounded-full shrink-0"
+                          />
+                          <p className="text-sm font-semibold truncate">
+                            {regionNameByLocale(r.country_code)}
+                          </p>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm truncate">
+                            {r.team_name}
+                          {isMine && (
+                            <span className="rounded bg-yellow-200 ml-2 px-2 py-0.5 text-xs font-semibold shrink-0">
+                              My Pick
+                            </span>
+                          )}  
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 justify-end">
                           <span className="text-base font-bold text-primary tabular-nums">
                             {r.votes}
                           </span>
                         </div>
-                      </li>
+                      </div>
+                    </li>
                     );
                   })}
                 </ul>
@@ -170,49 +172,51 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
                   const isMine = myTeamId ? r.team_id === myTeamId : false;
 
                   return (
-                    <div
-                      key={`${r.team_id}-${rank}`}
-                      className={cn(
-                        'flex items-center justify-between rounded-xl bg-white border p-3 shadow-sm',
-                        isMine && 'bg-yellow-50',
-                        rank <= 3 && 'border-2 border-red-500'
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          'w-6 text-center font-bold tabular-nums',
-                          rank <= 3 ? 'text-primary' : 'text-black'
-                        )}
-                      >
-                        {rank}
+                 <div
+                    key={`${r.team_id}-${rank}`}
+                    className={cn(
+                      'rounded-xl bg-white border p-3 shadow-sm',
+                      isMine && 'bg-yellow-50',
+                      rank <= 3 && 'border-2 border-red-500'
+                    )}
+                  >
+                <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)_auto] items-center gap-3">
+                  <span
+                    className={cn(
+                      'w-6 text-center font-bold tabular-nums',
+                      rank <= 3 ? 'text-primary' : 'text-black'
+                    )}
+                  >
+                    {rank}
+                  </span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Image
+                      src={flagSrc(r.country_code)}
+                      alt={`${regionNameByLocale(r.country_code)} flag`}
+                      width={36}
+                      height={36}
+                      className="rounded-full shrink-0"
+                    />
+                    <p className="text-sm font-semibold truncate">
+                      {regionNameByLocale(r.country_code)}
+                    </p>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground truncate">
+                      {r.team_name}
+                    {isMine && (
+                      <span className="rounded bg-yellow-200 ml-2 px-2 py-0.5 text-xs font-semibold shrink-0">
+                        My Pick
                       </span>
+                    )}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 justify-end">
+                    <div className="tabular-nums text2">{r.votes}</div>
+                  </div>
+                  </div>
+                </div>
 
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <Image
-                          src={flagSrc(r.country_code)}
-                          alt={`${regionNameByLocale(r.country_code)} flag`}
-                          width={24}
-                          height={24}
-                          className="rounded-full shrink-0"
-                        />
-                        <div className="leading-tight min-w-0">
-                          <p className="text-sm font-semibold truncate">
-                            {regionNameByLocale(r.country_code)}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">{r.team_name}</p>
-                        </div>
-
-                        {isMine && (
-                          <span className="rounded bg-yellow-200 px-2 py-0.5 text-xs shrink-0">
-                            My Pick
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <div className="tabular-nums text2">{r.votes}</div>
-                      </div>
-                    </div>
                   );
                 })}
               </div>
