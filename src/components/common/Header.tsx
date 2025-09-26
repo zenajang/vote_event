@@ -16,7 +16,7 @@ function HeaderContent() {
   const [user, setUser] = useState<User | null>(null);
 
   const isLoginPage = pathname === '/login';
-  
+  const isClosedPage = /^(?:\/[a-z]{2}(?:-[A-Z]{2})?)?\/closed(?:\/|$)/.test(pathname);
 
    useEffect(() => {
     let mounted = true;
@@ -60,7 +60,7 @@ function HeaderContent() {
         </div>
 
         <div className="absolute right-3 inset-y-0 flex items-center">
-          {!isLoginPage && (
+          {!isLoginPage && !isClosedPage && (
             user ? (
               <div className="flex items-center gap-3">
                 <Button

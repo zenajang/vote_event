@@ -4,10 +4,17 @@ import { NextRequest, NextResponse } from 'next/server'
 const ALLOWED_COUNTRIES = new Set(['KR'])
 
 const AUTH_FREE_RE =
-  /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:login|signup|auth(?:\/.*)?|not-available)(?:\/|$)/
+  /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:login|signup|auth(?:\/.*)?|not-available|closed)(?:\/|$)/
 
 const PROTECTED_RE =
   /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:vote|results)(?:\/|$)/
+
+function isClosedNow() {
+  const d = process.env.NEXT_PUBLIC_VOTE_DEADLINE
+  if (!d) return false
+  const t = Date.parse(d)
+  return !Number.isNaN(t) && Date.now() >= t
+}
 
 function getCountry(req: NextRequest) {
   return (
@@ -25,8 +32,14 @@ export async function middleware(req: NextRequest) {
 
   if (req.method === 'OPTIONS') return NextResponse.next()
 
-  const country = getCountry(req)
-  if (!ALLOWED_COUNTRIES.has(country)) {
+  if (isClosedNow() && !AUTH_FREE_RE.test(pathname)) {
+    const url = req.nextUrl.clone()
+    url.pathname = '/closed'
+    url.search = ''
+    return NextResponse.redirect(url, 302)
+  }
+
+  if (!ALLOWED_COUNTRIES.has(getCountry(req))) {
     return new NextResponse('Not Found', { status: 404 })
   }
 
