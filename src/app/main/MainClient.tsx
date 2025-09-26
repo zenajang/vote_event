@@ -50,7 +50,7 @@ export default function MainClient() {
         </div>
       </div>
 
-      <div className="px-6 pb-9">
+      <div className="px-6 pb-10">
         <Button
             onClick={handleNext}
             className="btn-primary1">

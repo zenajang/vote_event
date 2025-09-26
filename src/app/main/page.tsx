@@ -4,6 +4,6 @@ import MainClient from "./MainClient";
 export default async function Page() {
   return (
   <Suspense fallback={null} >
-    <MainClient />;
+    <MainClient />
   </Suspense>
 )}
