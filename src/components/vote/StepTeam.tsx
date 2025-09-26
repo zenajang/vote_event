@@ -161,7 +161,7 @@ export default function StepTeam({
 
       {msg && <p className="mt-4 text-sm rounded bg-muted px-3 py-2 inline-block">{msg}</p>}
 
-      <div className="mt-6 flex justify-between mb-10">
+      <div className="mt-6 flex justify-between pb-10">
         <Button variant="outline" className="btn-prev" onClick={onPrev}>
           Back
         </Button>

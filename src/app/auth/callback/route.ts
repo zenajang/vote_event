@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-
 import { createServerAction } from '@/lib/supabase/server-action';
 
 export async function GET(req: Request) {

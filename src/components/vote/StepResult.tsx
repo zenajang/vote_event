@@ -101,7 +101,7 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
       )}
 
       {loading ? (
-        <div className="py-8 text-center">
+        <div className="flex items-center justify-center min-h-[60vh]">
           <Spinner size="3" />
         </div>
       ) : (
@@ -156,7 +156,7 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
             </div>
           </section>
           
-          <section className="mb-10">
+          <section className="pb-10">
             <h3 className="heading2 mb-3 text-center">Remaining Teams in the Rankings</h3>
 
             {remainingSorted.length === 0 ? (

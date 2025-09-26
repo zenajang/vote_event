@@ -53,7 +53,6 @@ function TopTeamCard({ country, countryCode, team, votes }: TopTeam) {
   );
 }
 
-/** 하단: 전체 순위 한 줄 */
 function GlobalRankingRow({
   rank,
   item,
@@ -91,7 +90,7 @@ export default function StepConfirm({
   onClose,
   date,
   place,
-  message = 'Your vote has been successfully submitted! Invite your friends to support their favorite team',
+
   topTeams = [],
   globalRankings = [],
 }: Props) {
@@ -103,13 +102,15 @@ export default function StepConfirm({
 
       <div className="w-full bg-card rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] mt-6 p-5">
         {/* 상단 체크 + 안내 */}
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center mt-3">
           <Image src="/images/check.png" alt="check icon" width={80} height={24} />
           <h2 className="h1-onboarding text-primary mt-5 mb-3">Vote Completed</h2>
-          <p className="text-center text5">{message}</p>
-
+          <p className="text-center text5">
+            Your vote has been successfully submitted!<br/>
+            Invite your friends to support their favorite team
+          </p>
           {/* 일정/장소 */}
-          <div className="flex items-center gap-2 text-sm mt-10">
+          <div className="flex items-center gap-2 text-sm mt-13">
             <Image src="/images/calendar.png" alt="calendar icon" width={15} height={15} />
             <span className="heading3-secondary">
               {date || '2nd November 2025'}
@@ -155,7 +156,7 @@ export default function StepConfirm({
               Close
             </Button>
           )}
-          <Button onClick={onViewRankings} className="btn-primary">
+          <Button onClick={onViewRankings} className="btn-primary px-9">
             View Team Rankings
           </Button>
         </div>
