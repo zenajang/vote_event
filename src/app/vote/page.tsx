@@ -115,7 +115,6 @@ if ((step === 'country' || step === 'team') && checkingVote) {
   return null; 
 }
 
-// 제출
 const onSubmit = async () => {
   if (!teamId || submitting) return;
   setSubmitting(true);

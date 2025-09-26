@@ -23,8 +23,6 @@ function useSessionState<T>(key: string, initial: T | null) {
   return [value, setValue] as const;
 }
 
-// 안전한 step 관리
-// useStepFromURL 기존
 function useStepFromURL() {
   const [step, setStep] = useState<Step>('country');
 
@@ -38,7 +36,6 @@ function useStepFromURL() {
     };
     read();
 
-    // 뒤/앞으로만 듣던 걸 유지
     const onPop = () => read();
     window.addEventListener('popstate', onPop);
 

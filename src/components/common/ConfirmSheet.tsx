@@ -88,6 +88,5 @@ export default function ConfirmSheet({
     </div>
   );
 
-  // 포털로 body에 렌더 (z-index/레이어 안정)
   return createPortal(node, document.body);
 }

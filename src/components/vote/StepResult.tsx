@@ -51,7 +51,7 @@ export default function StepResult({ message, myTeamId, pollMs = 100000 }: Props
   }, [pollMs]);
 
   const championsMap = useMemo(() => {
-    const map = new Map<string, OverallRow>(); // country_code -> best row
+    const map = new Map<string, OverallRow>(); 
     for (const r of rows) {
       const cur = map.get(r.country_code);
       if (!cur || r.votes > cur.votes) {
