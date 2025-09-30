@@ -9,8 +9,7 @@ export default function OpenInBrowserPage() {
   const [isAndroid, setIsAndroid] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isNaver, setIsNaver] = useState(false);
-  const [isHardBlocked, setIsHardBlocked] = useState(false); // Naver/Instagram/Facebook, etc.
-
+  const [isHardBlocked, setIsHardBlocked] = useState(false);
   const search = typeof window !== 'undefined' ? window.location.search : '';
   const params = useMemo(() => new URLSearchParams(search), [search]);
   const redirect = useMemo(() => {
