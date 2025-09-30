@@ -2,6 +2,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
+const ALLOWED_COUNTRIES = new Set(['KR'])
+
 const AUTH_FREE_RE =
   /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:login|signup|auth(?:\/.*)?|not-available|closed|open-in-browser)(?:\/|$)/
 
@@ -15,6 +17,17 @@ function isClosedNow() {
   return !Number.isNaN(t) && Date.now() >= t
 }
 
+function getCountry(req: NextRequest) {
+  return (
+    process.env.TEST_FORCE_COUNTRY ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (req as any).geo?.country ||
+    req.headers.get('x-vercel-ip-country') ||
+    req.headers.get('cf-ipcountry') ||
+    ''
+  )
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl
 
@@ -24,6 +37,13 @@ export async function middleware(req: NextRequest) {
     const url = req.nextUrl.clone()
     url.pathname = '/closed'
     url.search = ''
+    return NextResponse.redirect(url, 302)
+  }
+
+  const country = getCountry(req)
+  if (!ALLOWED_COUNTRIES.has(country) && country !== '') {
+    const url = req.nextUrl.clone()
+    url.pathname = '/open-in-browser'
     return NextResponse.redirect(url, 302)
   }
 

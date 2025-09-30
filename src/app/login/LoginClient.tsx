@@ -23,6 +23,14 @@ export default function LoginClient() {
     });
   };
 
+    const ua = navigator.userAgent || '';
+    const isRestrictedInApp = /(NAVER|Instagram|FBAV|FBAN)/i.test(ua);
+
+    if (isRestrictedInApp) {
+      window.location.href = '/open-in-browser?redirect=/login';
+      return;
+    }
+
   return (
     <div className="min-h-[calc(100dvh-64px)] flex items-center justify-center p-6">
       <Card className="w-full max-w-sm p-6 space-y-4">
