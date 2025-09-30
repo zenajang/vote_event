@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 const ALLOWED_COUNTRIES = new Set(['KR'])
 
 const AUTH_FREE_RE =
-  /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:login|signup|auth(?:\/.*)?|not-available|closed)(?:\/|$)/
+  /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:login|signup|auth(?:\/.*)?|not-available|closed|open-in-browser)(?:\/|$)/
 
 const PROTECTED_RE =
   /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:vote|results)(?:\/|$)/
@@ -39,8 +39,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 302)
   }
 
-  if (!ALLOWED_COUNTRIES.has(getCountry(req))) {
-    return new NextResponse('Not Found', { status: 404 })
+  const country = getCountry(req)
+  if (!ALLOWED_COUNTRIES.has(country) && country !== '') {
+    const url = req.nextUrl.clone()
+    url.pathname = '/open-in-browser'
+    return NextResponse.redirect(url, 302)
   }
 
   if (AUTH_FREE_RE.test(pathname)) return NextResponse.next()
