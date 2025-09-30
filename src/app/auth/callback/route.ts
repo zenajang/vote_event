@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   }
 
   const jar = await cookies();
-  const next = jar.get('next')?.value || `/vote`;
+  const next = jar.get('next')?.value || `/main`;
   jar.set('next', '', { path: '/', maxAge: 0 });
 
   return NextResponse.redirect(new URL(next, url.origin));
