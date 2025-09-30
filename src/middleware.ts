@@ -28,10 +28,25 @@ function getCountry(req: NextRequest) {
   )
 }
 
+function isWebView(req: NextRequest) {
+  const ua = req.headers.get('user-agent') || ''
+  if (/(KAKAOTALK|NAVER|Line|Instagram|FBAV|FBAN)/i.test(ua)) return true
+  if (/Android/i.test(ua) && /; wv\)/i.test(ua)) return true
+  return false
+}
+
+
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl
 
   if (req.method === 'OPTIONS') return NextResponse.next()
+
+  if (isWebView(req) && /^\/(login|signup)/.test(pathname)) {
+    const url = req.nextUrl.clone()
+    url.pathname = '/open-in-browser'
+    url.search = `?redirect=${encodeURIComponent(pathname + search)}`
+    return NextResponse.redirect(url, 302)
+  }
 
   if (isClosedNow() && !AUTH_FREE_RE.test(pathname)) {
     const url = req.nextUrl.clone()

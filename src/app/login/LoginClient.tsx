@@ -4,13 +4,27 @@ import { createClient } from '@/lib/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
 
 
 export default function LoginClient() {
   const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingBrowser, setIsCheckingBrowser] = useState(true);
+
+  useEffect(() => {
+    const ua = navigator.userAgent || '';
+    const isRestrictedInApp = /(KAKAOTALK|NAVER|Instagram|FBAV|FBAN|Line)/i.test(ua);
+    
+    const isAndroidWebView = /Android/i.test(ua) && /wv|WebView/i.test(ua);
+
+    if (isRestrictedInApp || isAndroidWebView) {
+      window.location.href = '/open-in-browser?redirect=/login';
+      return;
+    }
+
+    setIsCheckingBrowser(false);
+  }, []);
 
   const signIn = async (provider: 'google') => {
     if (isLoading) return;
@@ -23,14 +37,16 @@ export default function LoginClient() {
     });
   };
 
-    const ua = navigator.userAgent || '';
-    const isRestrictedInApp = /(NAVER|Instagram|FBAV|FBAN)/i.test(ua);
-
-    if (isRestrictedInApp) {
-      window.location.href = '/open-in-browser?redirect=/login';
-      return;
-    }
-
+  if (isCheckingBrowser) {
+    return (
+      <div className="min-h-[calc(100dvh-64px)] flex items-center justify-center">
+        <svg className="animate-spin h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+    );
+  }
   return (
     <div className="min-h-[calc(100dvh-64px)] flex items-center justify-center p-6">
       <Card className="w-full max-w-sm p-6 space-y-4">
