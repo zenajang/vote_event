@@ -30,8 +30,9 @@ function getCountry(req: NextRequest) {
 
 function isWebView(req: NextRequest) {
   const ua = req.headers.get('user-agent') || ''
-  if (/(KAKAOTALK|NAVER|Line|Instagram|FBAV|FBAN)/i.test(ua)) return true
   if (/Android/i.test(ua) && /; wv\)/i.test(ua)) return true
+  if (/iPhone|iPad|iPod/i.test(ua) && !/Safari/i.test(ua) && /AppleWebKit/i.test(ua)) return true
+  if (/(NAVER|Instagram|FBAV|FBAN)/i.test(ua)) return true
   return false
 }
 

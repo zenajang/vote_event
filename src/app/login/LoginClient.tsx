@@ -14,11 +14,13 @@ export default function LoginClient() {
 
   useEffect(() => {
     const ua = navigator.userAgent || '';
-    const isRestrictedInApp = /(KAKAOTALK|NAVER|Instagram|FBAV|FBAN|Line)/i.test(ua);
-    
-    const isAndroidWebView = /Android/i.test(ua) && /wv|WebView/i.test(ua);
 
-    if (isRestrictedInApp || isAndroidWebView) {
+    const willGoogleBlock = 
+      (/Android/i.test(ua) && /; wv\)/i.test(ua)) ||
+      (/iPhone|iPad|iPod/i.test(ua) && !/Safari/i.test(ua) && /AppleWebKit/i.test(ua)) ||
+      /(NAVER|Instagram|FBAV|FBAN)/i.test(ua);
+
+    if (willGoogleBlock) {
       window.location.href = '/open-in-browser?redirect=/login';
       return;
     }
