@@ -12,7 +12,7 @@ export default function LoginClient() {
 
   const signIn = async (provider: 'google') => {
     const secure = location.protocol === 'https:' ? '; Secure' : '';
-    document.cookie = `next=/vote; Path=/; SameSite=Lax${secure}`;
+    document.cookie = `next=/main; Path=/; SameSite=Lax${secure}`;
     await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: `${location.origin}/auth/callback` },

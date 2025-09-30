@@ -1,23 +1,19 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
+interface MainClientProps {
+  initialUser: User | null;
+}
 
-export default function MainClient() {
-  const supabase = createClient();
+export default function MainClient({ initialUser }: MainClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const qs = useSearchParams();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-  }, [supabase]);
+  const user = initialUser;
 
   const handleNext = () => {
     const current = pathname + (qs?.toString() ? `?${qs}` : "");
