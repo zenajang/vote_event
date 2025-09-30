@@ -8,7 +8,6 @@ export default function OpenInBrowserPage() {
   const [ua, setUa] = useState('');
   const [isAndroid, setIsAndroid] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [isNaver, setIsNaver] = useState(false);
   const [isHardBlocked, setIsHardBlocked] = useState(false);
   const search = typeof window !== 'undefined' ? window.location.search : '';
   const params = useMemo(() => new URLSearchParams(search), [search]);
@@ -27,7 +26,6 @@ export default function OpenInBrowserPage() {
     const hardBlock = /(naver|instagram|fbav|fban)/.test(s); // commonly block external intents
     setIsAndroid(isAnd);
     setIsIOS(isiOS);
-    setIsNaver(/naver/.test(s));
     setIsHardBlocked(inApp && hardBlock);
   }, []);
 
@@ -90,7 +88,6 @@ export default function OpenInBrowserPage() {
               <Button onClick={copyUrl} variant="outline" className="w-full h-12">Copy URL</Button>
               <div className="text-left text-xs text-gray-600 p-4 bg-gray-50 rounded-lg">
                 <p className="font-medium mb-1">📱 How to open externally</p>
-                {isNaver && <p><b>Naver app</b>: Top-right <b>⋮</b> → <b>Open in default browser</b></p>}
                 <p><b>iPhone</b>: Share or <b>…</b> → <b>Open in Safari</b></p>
                 <p><b>Android</b>: <b>⋮</b> → <b>Open in Chrome</b></p>
                 <p className="mt-2 break-all text-gray-500">{redirect}</p>
@@ -122,7 +119,6 @@ export default function OpenInBrowserPage() {
               <Button onClick={copyUrl} variant="outline" className="w-full h-12">Copy URL</Button>
               <div className="mt-6 p-4 bg-gray-50 rounded-lg text-left text-xs text-gray-600">
                 <p className="font-medium mb-1">📱 How to open externally</p>
-                {isNaver && <p><b>Naver app</b>: Top-right <b>⋮</b> → <b>Open in default browser</b></p>}
                 <p><b>iPhone</b>: Share or <b>…</b> → <b>Open in Safari</b></p>
                 <p><b>Android</b>: <b>⋮</b> → <b>Open in Chrome</b></p>
                 <p className="mt-2 break-all text-gray-500">{redirect}</p>
