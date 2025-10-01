@@ -28,6 +28,7 @@ const TEAM_IMAGE_SCALES: Record<number, number> = {
   75: 135,
   79: 120,
   81: 105,
+  82: 128,
   83: 135,
   84: 135,
   85: 127,
