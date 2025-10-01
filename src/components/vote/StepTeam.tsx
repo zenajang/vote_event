@@ -21,57 +21,91 @@ type Props = {
   canSubmit: boolean;
   loading?: boolean;
 };
+
+const TEAM_IMAGE_SCALES: Record<number, number> = {
+  78: 140,
+  74: 135,
+  75: 135,
+  79: 120,
+  81: 105,
+  83: 135,
+  84: 135,
+  85: 127,
+  86: 135,
+  89: 135,
+  90: 135,
+  91: 125,
+  92: 135,
+  93: 135,
+  94: 120,
+  95: 105,
+};
+
 function TeamImage({
   countryCode,
   teamId,
   teamName,
   logoUrl,
   className,
+  scale = 100,
 }: {
   countryCode?: string;
   teamId: number;
   teamName: string;
   logoUrl?: string;
   className?: string;
+  scale?: number;
 }) {
+  const [extIndex, setExtIndex] = useState(0);
   const [error, setError] = useState(false);
 
+  const exts = ['jpg', 'png', 'jpeg', 'webp'];
   const localSrc =
-    countryCode ? `/images/team/${String(countryCode).toLowerCase()}/${teamId}.png` : '';
+    countryCode ? `/images/team/${String(countryCode).toLowerCase()}/${teamId}.${exts[extIndex]}` : '';
 
   const src = !error ? (localSrc || logoUrl || '') : '';
 
-  return (
+   return (
     <div
       className={cn(
-        'relative w-full h-30 rounded-xl bg-muted overflow-hidden',
+        // ✔ 모든 카드에서 동일한 박스 크기/비율 유지
+        'relative w-full rounded-xl bg-muted overflow-hidden',
         'aspect-[4/3] sm:aspect-[16/9] min-h-[9rem] md:min-h-[12rem]',
-        'grid place-items-center px-3 text-center',
+        'flex items-center justify-center px-3 text-center',
         className
       )}
     >
-      {src && !error && (
-        <Image
-          fill
-          src={src}
-          alt={`${teamName} photo`}
-          className="object-cover"
-          onError={() => {
-            if (src === localSrc && logoUrl) {
-              setError(true);
-            } else {
-              setError(true);
-            }
-          }}
-          key={`${teamId}-${error ? 'fallback' : 'img'}`}
-        />
-      )}
-
-      {(!src || error) && (
-        <span className="text-sm font-semibold text-foreground/70 leading-tight line-clamp-2">
-          {teamName}
-        </span>
-      )}
+      {/* 스케일을 적용할 내부 래퍼: 박스 크기는 그대로, 안쪽 콘텐츠만 확대/축소 */}
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{
+          transform: `scale(${(scale ?? 100) / 100})`,
+          transformOrigin: 'center',
+        }}
+      >
+        <div className="relative w-full h-full">
+          {src && !error ? (
+            <Image
+              fill
+              src={src}
+              alt={`${teamName} photo`}
+              // ✔ 잘리지 않도록 contain
+              className="object-contain"
+              onError={() => {
+                if (extIndex < exts.length - 1) setExtIndex((v) => v + 1);
+                else setError(true);
+              }}
+              key={`${teamId}-${extIndex}`}
+              // 선택: 성능 최적화
+              sizes="(min-width: 768px) 600px, 300px"
+            />
+          ) : (
+            <span className="text-sm font-semibold text-foreground/70 leading-tight line-clamp-2">
+              {teamName}
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -137,7 +171,7 @@ export default function StepTeam({
                   tabIndex={tabIndex}
                   onClick={() => onSelect(team.id)}
                   className={cn(
-                    'w-full h-auto p-0 !items-stretch !justify-start flex flex-col text-left',
+                    'w-full mx-auto h-auto p-0 !items-stretch !justify-start flex flex-col text-left',
                     'rounded-2xl gap-2 bg-card hover:bg-transparent hover:text-inherit',
                     'border border-input shadow-[0_6px_10px_rgba(0,0,0,0.14)] hover:shadow-[0_10px_24px_rgba(0,0,0,0.12)]',
                     active && 'border-2 border-primary'
@@ -149,6 +183,7 @@ export default function StepTeam({
                       teamId={team.id}
                       teamName={team.name}
                       logoUrl={team.logoUrl}
+                      scale={TEAM_IMAGE_SCALES[team.id] || 100}
                     />
                   </div>
                   <div className="items-center flex flex-col mb-3">
