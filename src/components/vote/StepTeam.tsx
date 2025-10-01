@@ -65,23 +65,12 @@ function TeamImage({
 
   const src = !error ? (localSrc || logoUrl || '') : '';
 
-   return (
-    <div
-      className={cn(
-        // ✔ 모든 카드에서 동일한 박스 크기/비율 유지
-        'relative w-full rounded-xl bg-muted overflow-hidden',
-        'aspect-[4/3] sm:aspect-[16/9] min-h-[9rem] md:min-h-[12rem]',
-        'flex items-center justify-center px-3 text-center',
-        className
-      )}
-    >
-      {/* 스케일을 적용할 내부 래퍼: 박스 크기는 그대로, 안쪽 콘텐츠만 확대/축소 */}
+    return (
+    <div className={cn('relative w-full rounded-xl bg-muted overflow-hidden', 'px-3 text-center', className)}>
+      <div className="w-full" style={{ paddingTop: '60%' }} />
       <div
         className="absolute inset-0 flex items-center justify-center"
-        style={{
-          transform: `scale(${(scale ?? 100) / 100})`,
-          transformOrigin: 'center',
-        }}
+        style={{ transform: `scale(${(scale ?? 100) / 100})`, transformOrigin: 'center' }}
       >
         <div className="relative w-full h-full">
           {src && !error ? (
@@ -89,14 +78,9 @@ function TeamImage({
               fill
               src={src}
               alt={`${teamName} photo`}
-              // ✔ 잘리지 않도록 contain
               className="object-contain"
-              onError={() => {
-                if (extIndex < exts.length - 1) setExtIndex((v) => v + 1);
-                else setError(true);
-              }}
+              onError={() => (extIndex < exts.length - 1 ? setExtIndex(v => v + 1) : setError(true))}
               key={`${teamId}-${extIndex}`}
-              // 선택: 성능 최적화
               sizes="(min-width: 768px) 600px, 300px"
             />
           ) : (
@@ -109,7 +93,6 @@ function TeamImage({
     </div>
   );
 }
-
 export default function StepTeam({
   country,
   teams,
