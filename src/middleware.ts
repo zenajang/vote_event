@@ -44,6 +44,24 @@ export async function middleware(req: NextRequest) {
 
   if (req.method === "OPTIONS") return NextResponse.next();
 
+  // ✅ 1단계: not-available 페이지는 항상 허용 (무한 리디렉트 방지)
+  if (pathname === "/not-available" || pathname.startsWith("/not-available/")) {
+    return NextResponse.next();
+  }
+
+  // ✅ 2단계: 국가 체크 - 가장 먼저! (한국 아니면 무조건 차단)
+  const country = getCountry(req);
+  if (country !== "" && !ALLOWED_COUNTRIES.has(country)) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/not-available";
+    url.search = "";
+    const res = NextResponse.redirect(url, 302);
+    res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.headers.set("Vary", "x-vercel-ip-country");
+    return res;
+  }
+
+  // 3단계: WebView 체크
   if (isWebView(req) && /^\/(login|signup)/.test(pathname)) {
     const url = req.nextUrl.clone();
     url.pathname = "/open-in-browser";
@@ -51,6 +69,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 302);
   }
 
+  // 4단계: 투표 마감 체크
   if (isClosedNow() && !AUTH_FREE_RE.test(pathname)) {
     const url = req.nextUrl.clone();
     url.pathname = "/closed";
@@ -58,20 +77,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 302);
   }
 
-  const country = getCountry(req);
-  if (!ALLOWED_COUNTRIES.has(country) && country !== "") {
-    const url = req.nextUrl.clone();
-    url.pathname = "/open-in-browser";
-    const res = NextResponse.redirect(url, 302);
-    res.headers.set("Cache-Control", "no-store");
-    res.headers.set("Vary", "x-vercel-ip-country");
-    return res;
-  }
-
+  // 5단계: AUTH_FREE 페이지는 통과
   if (AUTH_FREE_RE.test(pathname)) return NextResponse.next();
 
+  // 6단계: PROTECTED가 아니면 통과
   if (!PROTECTED_RE.test(pathname)) return NextResponse.next();
 
+  // 7단계: 인증 체크
   const res = NextResponse.next();
   res.headers.set("Vary", "x-vercel-ip-country");
   const supabase = createServerClient(
