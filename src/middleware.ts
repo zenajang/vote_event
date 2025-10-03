@@ -17,7 +17,6 @@ function isClosedNow() {
 
 function getCountry(req: NextRequest) {
   return (
-    process.env.TEST_FORCE_COUNTRY ||
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (req as any).geo?.country ||
     req.headers.get("x-vercel-ip-country") ||
